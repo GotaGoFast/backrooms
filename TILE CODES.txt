@@ -1,0 +1,15 @@
+
+
+TILE CODES
+0 = empty blank air tile
+- TRANSPARENT
+- AIR TYPE
+
+1 = normal wall tile
+- OPAQUE
+- WALL TYPE
+
+2 = column tile
+- OPAQUE
+- WALL TYPE
+- SPECIAL TEXTURE
