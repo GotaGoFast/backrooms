@@ -380,25 +380,33 @@ function updateGraphics() {
 }
 
 function checkKeys() {
-    if (keysPressed["a"] == true) {
-        angle += 3
-    }
-    if (keysPressed["d"] == true) {
-        angle -= 3
-    }
     
     if ((angle > 360) || (angle < 0)) {
         angle = getTrueAngle(angle)
     }
 
-    if (keysPressed["w"] == true) {
-        tilePosX += 0.4 * Math.cos(rad(angle))
-        tilePosY += 0.4 * Math.sin(rad(angle))
-    }
-
-    if (keysPressed["s"] == true) {
-        tilePosX -= 0.4 * Math.cos(rad(angle))
-        tilePosY -= 0.4 * Math.sin(rad(angle))
+    if ((keysPressed["w"] == true) && (keysPressed["s"] == false)) {
+        if ((keysPressed["a"] == true) && (keysPressed["d"] == false)) {
+            tilePosX += 0.4 * Math.cos(rad(getTrueAngle(angle - 45)))
+            tilePosY += 0.4 * Math.sin(rad(getTrueAngle(angle - 45)))
+        } else if ((keysPressed["d"] == true) && (keysPressed["a"] == false)) {
+            tilePosX += 0.4 * Math.cos(rad(getTrueAngle(angle + 45)))
+            tilePosY += 0.4 * Math.sin(rad(getTrueAngle(angle + 45)))
+        } else {
+            tilePosX += 0.4 * Math.cos(rad(angle))
+            tilePosY += 0.4 * Math.sin(rad(angle))
+        }
+    } else if ((keysPressed["s"] == true) && (keysPressed["w"] == false)) {
+        if ((keysPressed["a"] == true) && (keysPressed["d"] == false)) {
+            tilePosX -= 0.4 * Math.cos(rad(getTrueAngle(angle + 45)))
+            tilePosY -= 0.4 * Math.sin(rad(getTrueAngle(angle + 45)))
+        } else if ((keysPressed["d"] == true) && (keysPressed["a"] == false)) {
+            tilePosX -= 0.4 * Math.cos(rad(getTrueAngle(angle - 45)))
+            tilePosY -= 0.4 * Math.sin(rad(getTrueAngle(angle - 45)))
+        } else {
+            tilePosX -= 0.4 * Math.cos(rad(angle))
+            tilePosY -= 0.4 * Math.sin(rad(angle))
+        }
     }
 
     if (tilePosX < 0) {
