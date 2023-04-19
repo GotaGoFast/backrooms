@@ -472,7 +472,7 @@ window.addEventListener('keyup', function (e) {
 }, false);
 
 function updatePosition(e) {
-    angle -= e.movementX * 0.01
+    angle += e.movementX * 0.5
 }
 
 function lockChangeAlert() {
