@@ -533,7 +533,7 @@ document.addEventListener("pointerlockchange", lockChangeAlert, false);
 
 //store
 const tileSize = 100
-const renderDist = 10
+const renderDist = 100
 const spread = 500
 const viewAngle = 60
 const opaqueTiles = [1, 2]
