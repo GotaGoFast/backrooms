@@ -59,6 +59,7 @@ function nextInt(value, direction) { //returns what the next int is
     }
 }
 
+
 function generateTile() { //generates a tile of size [tileSize]
 
     let tile = []
@@ -416,12 +417,70 @@ function checkKeys() {
     }
 
     if ((keys["w"]) || (keys["a"]) || (keys["s"]) || (keys["d"])) {
-        
-        // if (!(wallTiles.includes(exploredTiles[mazePosY][mazePosX][Math.floor(tilePosY)][nextInt(tilePosX + 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir))), Math.sign(Math.cos(rad(getTrueAngle(angle + moveDir)))))])) && !(wallTiles.includes(exploredTiles[mazePosY][mazePosX][Math.floor(tilePosY)][nextInt(tilePosX + 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir))) + 0.5 * Math.sign(Math.cos(rad(getTrueAngle(angle + moveDir)))), Math.sign(Math.cos(rad(getTrueAngle(angle + moveDir)))))]))) {
-        tilePosX += 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir)))
 
-        // if (!(wallTiles.includes(exploredTiles[mazePosY][mazePosX][nextInt(tilePosY + 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir))), Math.sign(Math.cos(rad(getTrueAngle(angle + moveDir)))))][Math.floor(tilePosX)])) && !(wallTiles.includes(exploredTiles[mazePosY][mazePosX][nextInt(tilePosY + 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir))) + 0.5 * Math.sign(Math.cos(rad(getTrueAngle(angle + moveDir)))), Math.sign(Math.cos(rad(getTrueAngle(angle + moveDir)))))][Math.floor(tilePosX)]))) {
-        tilePosY += 0.4 * Math.sin(rad(getTrueAngle(angle + moveDir)))
+
+        let verts = [[0.4, 0.4], [0.4, -0.4], [-0.4, -0.4], [-0.4, 0.4]]
+        let mazeModX = 0
+        let mazeModY = 0
+        let tempTilePosX = 0
+        let tempTilePosY = 0
+        let collided = 0
+
+        for (let j = 0; j < 3; j++) {
+
+            if (j != 1) {
+                tilePosX += 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir)))
+            }
+
+            if (j != 2) {
+                tilePosY += 0.4 * Math.sin(rad(getTrueAngle(angle + moveDir)))
+            }
+
+            collided = 0
+
+            for (let i = 0; i < 4; i++) {
+
+                mazeModX = 0
+                mazeModY = 0
+                tempTilePosX = 0
+                tempTilePosY = 0
+
+                tempTilePosX = tilePosX + verts[i][0]
+                tempTilePosY = tilePosY + verts[i][1]
+
+                if (tempTilePosX < 0) {
+                    mazeModX --
+                    tempTilePosX += tileSize
+                } else if (tempTilePosX >= tileSize) {
+                    mazeModX ++
+                    tempTilePosX -= tileSize
+                }
+                if (tempTilePosY < 0) {
+                    mazeModY --
+                    tempTilePosY += tileSize
+                } else if (tempTilePosY >= tileSize) {
+                    mazeModY ++
+                    tempTilePosY -= tileSize
+                }
+
+                if (wallTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][Math.floor(tempTilePosY)][Math.floor(tempTilePosX)])) {
+                    collided = 1
+                    break
+                }
+            }
+
+            if (collided == 1) {
+                if (j != 1) {
+                    tilePosX -= 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir)))
+                }
+    
+                if (j != 2) {
+                    tilePosY -= 0.4 * Math.sin(rad(getTrueAngle(angle + moveDir)))
+                }
+            } else {
+                break
+            }
+        }
     }
 
     if (tilePosX < 0) {
