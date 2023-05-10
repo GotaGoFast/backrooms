@@ -783,7 +783,7 @@ const wallTiles = [1, 2, 4]
 const opaqueTextures = {1:0, 2:0}
 const debug = 0
 const threeDee = 1
-const floors = 0
+const floors = 1
 const viewRadius = Math.ceil(renderDist / tileSize) + 1
 
 const angus = new Image()
@@ -826,7 +826,7 @@ var yOffBottom = 0
 var level = 0
 var sprint = 5 // seconds
 var sprintTimer = 0
-var fps = 120
+var fps = 60
 var startFlag = true
 var realFPS = 0
 var viewAngle = 60
