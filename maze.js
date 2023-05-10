@@ -132,7 +132,7 @@ function generateTile() { //generates a tile of size [tileSize]
         tile.push(row)
     }
 
-    let density = tileSize / 5
+    let density = tileSize * tileSize * 0.002
     for (let i = 0; i < density; i++) {
         let length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
         let wallX = rand(0, tileSize - 1)
@@ -148,7 +148,7 @@ function generateTile() { //generates a tile of size [tileSize]
         }
     }
 
-    let columns = rand(0, Math.ceil(tileSize / 10))
+    let columns = rand(0, Math.ceil(tileSize * tileSize * 0.005))
     for (let i = 0; i < columns; i++) {
         wallX = rand(0, tileSize - 2)
         wallY = rand(0, tileSize - 2)
@@ -157,6 +157,25 @@ function generateTile() { //generates a tile of size [tileSize]
             wallY = rand(0, tileSize - 2)
         }
         tile[wallX][wallY] = 2
+    }
+
+    let lights = rand(1, Math.floor(tileSize * tileSize * 0.01))
+    for (let i = 0; i < lights; i++) {
+        let rando = rand(0, tileSize - 2)
+        let rando2 = rand(0, tileSize - 2)
+        if (!(wallTiles.includes(tile[rando][rando2]))) {
+            tile[rando][rando2] = 3
+        }
+        if (!(wallTiles.includes(tile[rando+1][rando2]))) {
+            tile[rando+1][rando2] = 3
+        }
+        if (!(wallTiles.includes(tile[rando+1][rando2+1]))) {
+            tile[rando+1][rando2+1] = 3
+        }
+        if (!(wallTiles.includes(tile[rando][rando2+1]))) {
+            tile[rando][rando2+1] = 3
+        }
+
     }
 
 
@@ -250,7 +269,9 @@ function rayCast() {
     let currentSquareX = 0 //what square on grid is being checked
     let currentSquareY = 0 //what square on grid is being checked
     let entitiesHit = [] //entities seen
-    let distInWall = 0
+    let distInWall = 0 //distance in wall
+    let roofs = []
+
 
     if (debug == 1) {
         canvas.beginPath()
@@ -282,7 +303,7 @@ function rayCast() {
     }
 
     canvas.beginPath()
-    canvas.fillStyle = "#87990f"
+    canvas.fillStyle = "#f2ec7c"
     canvas.fillRect(startX, startY, size, size/2)
     canvas.fillStyle = "#99940f"
     canvas.fillRect(startX, startY + size/2, size, size/2)
@@ -302,6 +323,7 @@ function rayCast() {
         currentSquareX = 0
         currentSquareY = 0
         wallType = 0
+        roofs.push([0])
 
         if (rayAngle > 180) {
             directionY = -1
@@ -372,6 +394,14 @@ function rayCast() {
                     hit = true
                 }
             }
+
+            let tempDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
+            if (tempDist > 1) {
+                roofs[i].push([(size - (size / tempDist)) / 2, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
+            } else {
+                roofs[i][0] = [0, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
+            }
+
             rendDist++
         }
 
@@ -380,7 +410,6 @@ function rayCast() {
         }
 
         dist = Math.sqrt(Math.pow(- tilePosY + posY + tileSize * mazeModY, 2) + Math.pow( - tilePosX + posX + tileSize * mazeModX, 2)) / 4
-        
         perpDist = dist * Math.cos(rad(Math.abs(angle - rayAngle)))
 
         wallHeight = size / perpDist //the derivation of height based on distance. assumed viewing angle
@@ -394,7 +423,7 @@ function rayCast() {
             distInWall = posX % 1
         }
     
-        wallType = levelTextures[level][opaqueTextures[exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]]
+        // wallType = levelTextures[level][opaqueTextures[exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]]
         
         rays.push([i, wallHeight, perpDist, wallType, dist * 4, distInWall])
 
@@ -434,8 +463,6 @@ function rayCast() {
 
         if ((entityDist < renderDist) && (-(viewAngle/2) < angleFrom(angle, entityAngle)) && (angleFrom(angle, entityAngle) < viewAngle/2)) {
             entitiesHit.push([entityAngle, entities[k].type, entityDist])
-            console.log(entityAngle)
-            console.log(angleFrom(angle, entityAngle))
         }
     }
 
@@ -444,35 +471,43 @@ function rayCast() {
     rays.reverse()
     entitiesHit.reverse()
 
-    let bruh = []
-
-    for (d = 0; d < rays.length; d++) {
-        bruh.push(rays[d][4])
-    }
-    // console.log(bruh)
-    // console.log(entitiesHit)
+    canvas.fillStyle = "#FFFFFF"
+    canvas.lineWidth = rayWidth + 1
+    // canvas.lineWidth = 5
+    let l = 0
 
     // if (threeDee) {
-        canvas.fillStyle = "#FFFFFF"
-        canvas.lineWidth = rayWidth + 1
-        // canvas.lineWidth = 5
-        let l = 0
+        if (floors) {
+        for (let m = 0; m < roofs.length; m++) {
+            for (let n = 0; n < roofs[m].length-1; n++) {
 
-        for (let k = 0; k < entitiesHit.length + 1; k++) {
-            while ((l < rays.length) && ((k == entitiesHit.length) || (rays[l][4] > entitiesHit[k][2]))) {
+                canvas.strokeStyle = roofColours[level][roofs[m][n][1]]
+                canvas.beginPath()
+                canvas.moveTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n][0])
+                canvas.lineTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n+1][0])
+                canvas.stroke()
+                canvas.closePath()
+            }
+        }
+        }
+    // }
 
-                if (rays[l][3] == 1) {
-                    canvas.strokeStyle = "#0a1463"
-                } else if (rays[l][3] == 0) {
-                    canvas.strokeStyle = "#0a6322"
-                } else {
-                    canvas.strokeStyle = "#000000"
-                }
-                
-                if (threeDee) {
+    for (let k = 0; k < entitiesHit.length + 1; k++) {
+        while ((l < rays.length) && ((k == entitiesHit.length) || (rays[l][4] > entitiesHit[k][2]))) {
+
+            if (rays[l][3] == 1) {
+                canvas.strokeStyle = "#0a1463"
+            } else if (rays[l][3] == 0) {
+                canvas.strokeStyle = "#0a6322"
+            } else {
+                canvas.strokeStyle = "#000000"
+            }
+            
+            if (threeDee) {
                 canvas.beginPath()
 
                 // canvas.drawImage(wallType, )
+
 
                 canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
                 canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
@@ -480,29 +515,59 @@ function rayCast() {
                 canvas.stroke()
         
                 canvas.closePath()
-                }
-
-                l++
             }
 
-            if (k != entitiesHit.length) {
-                canvas.strokeStyle = "#000000"
-
-                canvas.beginPath()
-                // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
-                // canvas.stroke()
-                canvas.drawImage(entitiesHit[k][1], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2, size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
-                canvas.closePath()
-
-            }
-
-            
+            l++
         }
-        canvas.lineWidth = 1
-    // }
+
+        if (k != entitiesHit.length) {
+            canvas.strokeStyle = "#000000"
+
+            canvas.beginPath()
+            // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
+            // canvas.stroke()
+            canvas.drawImage(entitiesHit[k][1], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2, size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+            canvas.closePath()
+
+        }
+
+        
+    }
+
+    canvas.fillStyle = "#FFFFFF"
+    canvas.fillRect(startX + 0.1 * size, startY + 0.9 * size, 0.2 * size, 0.05 * size)
+
+    canvas.fillStyle = "#000000"
+    canvas.fillRect(startX + 0.11 * size, startY + 0.91 * size, 0.18 * size * (sprint/5), 0.03 * size)
 }
 
 function checkKeys() {
+    
+    if ((sprintTimer < 2) && (sprint < 5) && !(keys["shift"])) {
+        sprintTimer += 1/realFPS
+    }
+
+    if ((sprint < 5) && (sprintTimer >= 2)) {
+        sprint += 0.5/realFPS
+    }
+
+    let speed = 1
+
+    if (keys["shift"]) {
+        if (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1)) {
+            sprintTimer = 0
+            speed = 1.5
+            sprint -= 1/realFPS
+
+            if (viewAngle < 70) {
+                viewAngle+= 100 / realFPS
+            }
+        }
+    } else {
+        if (viewAngle > 60) {
+            viewAngle-= 100 / realFPS
+        }
+    }
     
     if ((angle > 360) || (angle < 0)) {
         angle = getTrueAngle(angle)
@@ -545,11 +610,11 @@ function checkKeys() {
         for (let j = 0; j < 3; j++) {
 
             if (j != 1) {
-                tilePosX += 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir)))
+                tilePosX += speed * (12 / realFPS) * Math.cos(rad(getTrueAngle(angle + moveDir)))
             }
 
             if (j != 2) {
-                tilePosY += 0.4 * Math.sin(rad(getTrueAngle(angle + moveDir)))
+                tilePosY += speed * (12 / realFPS) * Math.sin(rad(getTrueAngle(angle + moveDir)))
             }
 
             collided = 0
@@ -587,11 +652,11 @@ function checkKeys() {
 
             if (collided == 1) {
                 if (j != 1) {
-                    tilePosX -= 0.4 * Math.cos(rad(getTrueAngle(angle + moveDir)))
+                    tilePosX -= speed * (12 / realFPS) * Math.cos(rad(getTrueAngle(angle + moveDir)))
                 }
     
                 if (j != 2) {
-                    tilePosY -= 0.4 * Math.sin(rad(getTrueAngle(angle + moveDir)))
+                    tilePosY -= speed * (12 / realFPS) * Math.sin(rad(getTrueAngle(angle + moveDir)))
                 }
             } else {
                 break
@@ -638,36 +703,55 @@ function changeWindow() {
             size = width
         }
 
-
         rayWidth = size / spread
     }
 }
 
 function mainloop() {
 
-    changeWindow()
+    let timerr = Date.now()
 
-    canvas.stroke()
+    changeWindow()
 
     if (!paused) {
 
-    checkKeys()
+        checkKeys()
 
-    rayCast()
+        rayCast()
+
+    } else {
+
+        menu()
 
     }
 
-    menu()
+    timerr = Date.now() - timerr
 
-    //updateGraphics()
+    if (1000/fps - timerr > 0) {
+
+        realFPS = fps
+
+        document.getElementById("fps").innerText = "fps: " + String(fps)
+
+        setTimeout(mainloop, 1000/fps - timerr)
+
+    } else {
+
+        realFPS = 1000 / timerr
+
+        document.getElementById("fps").innerText = "fps: " + String(1000/timerr)
+        
+        setTimeout(mainloop, 0)
+
+    }
 }
 
 window.addEventListener('keydown', function (e) {
-    keys[String(e.key)] = true
+    keys[String(e.key).toLowerCase()] = true
 }, false);
 
 window.addEventListener('keyup', function (e) {
-    keys[String(e.key)] = false
+    keys[String(e.key).toLowerCase()] = false
 }, false);
 
 function updatePosition(e) {
@@ -691,15 +775,15 @@ function lockChangeAlert() {
     }
 }
 //store
-const tileSize = 20
+const tileSize = 100
 const renderDist = 100
-const spread = 200
-const viewAngle = 60
-const opaqueTiles = [1, 2]
-const wallTiles = [1, 2]
+const spread = 500
+const opaqueTiles = [1, 2, 4]
+const wallTiles = [1, 2, 4]
 const opaqueTextures = {1:0, 2:0}
 const debug = 0
 const threeDee = 1
+const floors = 0
 const viewRadius = Math.ceil(renderDist / tileSize) + 1
 
 const angus = new Image()
@@ -717,6 +801,7 @@ const L0W1 = new Image()
 L0W1.src = "level_0_wall.png"
 
 const levelTextures = [[L0W1]]
+const roofColours = [{0: "#f2ec7c", 3: "#ffffff"}]
 
 var width = window.innerWidth - 30;
 var height = window.innerHeight - 30;
@@ -739,6 +824,12 @@ var yOffAngle = 0
 var yOffTop = 0
 var yOffBottom = 0
 var level = 0
+var sprint = 5 // seconds
+var sprintTimer = 0
+var fps = 120
+var startFlag = true
+var realFPS = 0
+var viewAngle = 60
 
 canvas.canvas.width = width;
 canvas.canvas.height = height;
@@ -754,10 +845,13 @@ canvas.closePath()
 
 c.addEventListener("click", async () => {
     if (canClick) {
-        clearInterval(interval)
         canClick = false
-        interval = setInterval(mainloop, 1000/30)
+        if (startFlag) {
+            startFlag = false
+            mainloop()
+        }
         paused = false
+        keys = {}
         if(!document.pointerLockElement) {
         await c.requestPointerLock({
             unadjustedMovement: true,
