@@ -18,14 +18,12 @@ class Entity {
             this.angle++
         }
     }
-    
 }
 
 function sortFunction(a, b) {
     if (a[2] === b[2]) {
         return 0;
-    }
-    else {
+    } else {
         return (a[2] < b[2]) ? -1 : 1;
     }
 }
@@ -40,12 +38,10 @@ function angleFrom(a, b) {
         } else {
             return b - a
         }
+    } else if (b - a < -180) {
+        return 360 + (b - a)
     } else {
-        if (b - a < -180) {
-            return 360 + (b - a)
-        } else {
-            return (b - a)
-        }
+        return (b - a)
     }
     // if ((-180 < (b - a)) && ((b - a) < 180)) {
     //     return b - a
@@ -89,34 +85,30 @@ function degrees(val) {
 }
 
 function getTrueAngle(angle) {
-        if (angle > 0) {
-            return angle % 360
-        } else {
-            return 360 - (Math.abs(angle) % 360)
-        }
+    if (angle > 0) {
+        return angle % 360
+    } else {
+        return 360 - (Math.abs(angle) % 360)
+    }
 }
 
 function next(value, direction) { //returns the distance to the next whole number
     if (Number.isInteger(value)) { //if whole number
         return direction //returns next whole number if upward, itself if downward
+    } else if (direction == 1) {
+        return Math.ceil(value) - value //distance upward
     } else {
-        if (direction == 1) {
-            return Math.ceil(value) - value //distance upward
-        } else {
-            return Math.floor(value) - value //distance downward
-        }
+        return Math.floor(value) - value //distance downward
     }
 }
 
 function nextInt(value, direction) { //returns what the next int is
     if (Number.isInteger(value)) { //if already whole number
         return value + direction //returns next whole number if upward, previous whole number if downward
+    } else if (direction == 1) {
+        return Math.ceil(value)
     } else {
-        if (direction == 1) {
-            return Math.ceil(value)
-        } else {
-            return Math.floor(value)
-        }
+        return Math.floor(value)
     }
 }
 
@@ -150,11 +142,11 @@ function generateTile() { //generates a tile of size [tileSize]
 
     let columns = rand(0, Math.ceil(tileSize * tileSize * 0.005))
     for (let i = 0; i < columns; i++) {
-        wallX = rand(0, tileSize - 2)
-        wallY = rand(0, tileSize - 2)
+        wallX = rand(1, tileSize - 2)
+        wallY = rand(1, tileSize - 2)
         while ((tile[wallX][wallY] == 1) && (tile[wallX][wallY+1] == 1) && (tile[wallX][wallY-1] == 1) && (tile[wallX+1][wallY] == 1) && (tile[wallX+1][wallY+1] == 1) && (tile[wallX+1][wallY-1] == 1) && (tile[wallX-1][wallY] == 1) && (tile[wallX-1][wallY+1] == 1) && (tile[wallX-1][wallY-1] == 1)) {
-            wallX = rand(0, tileSize - 2)
-            wallY = rand(0, tileSize - 2)
+            wallX = rand(1, tileSize - 2)
+            wallY = rand(1, tileSize - 2)
         }
         tile[wallX][wallY] = 2
     }
@@ -178,18 +170,6 @@ function generateTile() { //generates a tile of size [tileSize]
 
     }
 
-
-    // let tile = [] //2d list columns (down to up) -> rows (left to right)
-    // let row = []
-
-    // for (let j = 0; j < tileSize; j++) {
-    //     row = []
-    //     for (let i = 0; i < tileSize; i++) {
-    //         row.push(Math.round((rand(0, 51)/100)))
-    //     }
-    //     tile.push(row)
-    // }
-
     return tile //as per [tileSize]
 }
 
@@ -204,12 +184,12 @@ function initialiseMaze() { //creates initial maze and tiles
         maze.push(row) //adds rows to maze
     }
     maze[mazePosY][mazePosX][Math.floor(tilePosY)][Math.floor(tilePosX)] = 0 //making sure player doesn't spawn in a block
-    entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[rand(0, entityList.length - 1)]))
+    // entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[rand(0, entityList.length - 1)]))
+    
     return maze //4d list
 }
 
 function createMaze() { //generates new maze to suit tiles
-
     if (mazePosX - viewRadius < 0) { //if view radius goes outside to the left
             for (let i = 0; i < exploredTiles.length; i++) {
                 exploredTiles[i].unshift(generateTile()) //add an extra tile to front of row
@@ -244,13 +224,6 @@ function createMaze() { //generates new maze to suit tiles
 }
 
 function rayCast() {
-
-    canvas.strokeStyle = "#000000"
-    // canvas.font = "30px Arial"
-    // canvas.strokeText("angle: " + angle, 20, 50)
-    // canvas.strokeText("pos: " + tilePosX.toFixed(2) + ", "+ tilePosY.toFixed(2), 20, 90)
-    // canvas.strokeText("mazePos: " + mazePosX + " " + mazePosY + " of " + exploredTiles[0].length + " " + exploredTiles.length, 20, 130)
-
     let rays = [] //stores ray info
     let rayAngle = 0 //angle of current ray
     let hit = false //whether or not a ray has hit an opaque wall
@@ -271,7 +244,7 @@ function rayCast() {
     let entitiesHit = [] //entities seen
     let distInWall = 0 //distance in wall
     let roofs = []
-
+    let floorDist = 0
 
     if (debug == 1) {
         canvas.beginPath()
@@ -302,15 +275,7 @@ function rayCast() {
         canvas.closePath()
     }
 
-    canvas.beginPath()
-    canvas.fillStyle = "#f2ec7c"
-    canvas.fillRect(startX, startY, size, size/2)
-    canvas.fillStyle = "#99940f"
-    canvas.fillRect(startX, startY + size/2, size, size/2)
-    canvas.closePath()
-
     for (let i = 0; i < spread; i++) {
-        
         posX = tilePosX
         posY = tilePosY
         hit = false
@@ -324,6 +289,7 @@ function rayCast() {
         currentSquareY = 0
         wallType = 0
         roofs.push([0])
+        floorDist = 0
 
         if (rayAngle > 180) {
             directionY = -1
@@ -338,7 +304,6 @@ function rayCast() {
         }
         
         while ((hit == false) && (rendDist < renderDist + 1)) {
-
             if (Math.abs(next(posX, directionX) / Math.cos(rad(rayAngle))) < Math.abs(next(posY, directionY) / Math.sin(rad(rayAngle)))) {
                 //this is for if horizontal diagonally closer
                 posY = posY + (next(posX, directionX) * Math.tan(rad(rayAngle)))
@@ -395,27 +360,31 @@ function rayCast() {
                 }
             }
 
-            let tempDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
-            if (tempDist > 1) {
-                roofs[i].push([(size - (size / tempDist)) / 2, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
-            } else {
+            floorDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
+            
+            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (roofs[i].length < Math.ceil(renderDist/4))) {
+                roofs[i].push([(size - (size / floorDist)) / 2 + (size * jumpP / floorDist), exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
+            } else if ((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) {
                 roofs[i][0] = [0, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
+            } else if (roofs[i].length == Math.ceil(renderDist/4)) {
+                roofs[i].push([(size - (size / floorDist)) / 2 + (size * jumpP / floorDist), 0])
+            } else if ((hit) || (rendDist == renderDist)) {
+                roofs[i].push([(size - (size / floorDist)) / 2 + (size * jumpP / floorDist), 0])
             }
 
             rendDist++
         }
 
+        wallType = exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]
+
         if (rendDist >= renderDist + 1) {
-            wallType = 4
+            wallType = 1
         }
 
         dist = Math.sqrt(Math.pow(- tilePosY + posY + tileSize * mazeModY, 2) + Math.pow( - tilePosX + posX + tileSize * mazeModX, 2)) / 4
         perpDist = dist * Math.cos(rad(Math.abs(angle - rayAngle)))
 
         wallHeight = size / perpDist //the derivation of height based on distance. assumed viewing angle
-        if (wallHeight > size) {
-            wallHeight = size
-        }
 
         if (posX == Math.floor(posX)) {
             distInWall = posY % 1
@@ -437,6 +406,20 @@ function rayCast() {
     let entTotalY = 0
     let plaTotalX = 0
     let plaTotalY = 0
+
+    let gradient1 = canvas.createLinearGradient(size/2, 0, size/2, size)
+    gradient1.addColorStop(0, "#e6e685")
+    gradient1.addColorStop(1, "#8c8c32")
+
+    canvas.beginPath()
+    canvas.fillStyle = gradient1
+    canvas.fillRect(startX, startY, size, size/2)
+    let gradient2 = canvas.createLinearGradient(size/2, 0, size/2, size)
+    gradient2.addColorStop(0, "#61631b")
+    gradient2.addColorStop(1, "#bec242")
+    canvas.fillStyle = gradient2
+    canvas.fillRect(startX, startY + size/2, size, size/2)
+    canvas.closePath()
 
 
     for (k = 0; k < entities.length; k++) {
@@ -471,48 +454,48 @@ function rayCast() {
     rays.reverse()
     entitiesHit.reverse()
 
-    canvas.fillStyle = "#FFFFFF"
-    canvas.lineWidth = rayWidth + 1
-    // canvas.lineWidth = 5
-    let l = 0
-
-    // if (threeDee) {
-        if (floors) {
+    if (floors) {
+        canvas.lineWidth = rayWidth
         for (let m = 0; m < roofs.length; m++) {
             for (let n = 0; n < roofs[m].length-1; n++) {
-
+                let lining = 0
+                if ((n != roofs[m].length-2) && (roofs[m][n][1] == 0)) {
+                    lining = 1
+                }
                 canvas.strokeStyle = roofColours[level][roofs[m][n][1]]
                 canvas.beginPath()
-                canvas.moveTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n][0])
-                canvas.lineTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n+1][0])
+                canvas.moveTo(startX + (roofs.length - m - 0.5) * size/roofs.length, startY + roofs[m][n][0])
+                canvas.lineTo(startX + (roofs.length - m - 0.5) * size/roofs.length, startY + roofs[m][n+1][0] - lining)
                 canvas.stroke()
+                canvas.closePath()
+                canvas.strokeStyle = "#FFFFFF"
+                // canvas.beginPath()
+                // canvas.strokeStyle = "#000000"
+                // canvas.lineTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n+1][0] + 1)
+                // canvas.stroke()
                 canvas.closePath()
             }
         }
-        }
-    // }
+    }
+
+    let l = 0
 
     for (let k = 0; k < entitiesHit.length + 1; k++) {
         while ((l < rays.length) && ((k == entitiesHit.length) || (rays[l][4] > entitiesHit[k][2]))) {
-
-            if (rays[l][3] == 1) {
-                canvas.strokeStyle = "#0a1463"
-            } else if (rays[l][3] == 0) {
-                canvas.strokeStyle = "#0a6322"
-            } else {
-                canvas.strokeStyle = "#000000"
-            }
-            
             if (threeDee) {
                 canvas.beginPath()
 
-                // canvas.drawImage(wallType, )
+                if (Math.floor(rays[l][5] * 125) + rayWidth * 500 / rays[l][1] <= 125) {
+                    canvas.drawImage(levelTextures[level][rays[l][3]], Math.floor(rays[l][5] * 125), 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, rays[l][1])
 
+                } else {
+                    canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, rays[l][1])
+                }
+                
+                // canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
+                // canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
 
-                canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
-                canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
-
-                canvas.stroke()
+                // canvas.stroke()
         
                 canvas.closePath()
             }
@@ -523,11 +506,14 @@ function rayCast() {
         if (k != entitiesHit.length) {
             canvas.strokeStyle = "#000000"
 
-            canvas.beginPath()
-            // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
-            // canvas.stroke()
-            canvas.drawImage(entitiesHit[k][1], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2, size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
-            canvas.closePath()
+            if (entitiesSpawn == 1) {
+                canvas.beginPath()
+                // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
+                // canvas.stroke()
+                canvas.drawImage(entitiesHit[k][1], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2, size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+                canvas.closePath()
+
+            }
 
         }
 
@@ -541,8 +527,7 @@ function rayCast() {
     canvas.fillRect(startX + 0.11 * size, startY + 0.91 * size, 0.18 * size * (sprint/5), 0.03 * size)
 }
 
-function checkKeys() {
-    
+function updatePhysics() {
     if ((sprintTimer < 2) && (sprint < 5) && !(keys["shift"])) {
         sprintTimer += 1/realFPS
     }
@@ -551,22 +536,36 @@ function checkKeys() {
         sprint += 0.5/realFPS
     }
 
-    let speed = 1
+    jumpV -= 0.06/realFPS
 
-    if (keys["shift"]) {
-        if (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1)) {
-            sprintTimer = 0
-            speed = 1.5
-            sprint -= 1/realFPS
+    jumpP += jumpV
 
-            if (viewAngle < 70) {
-                viewAngle+= 100 / realFPS
-            }
+    if (jumpP < 0) {
+        jumpP = 0
+        jumpV = 0
+        jump = 0
+    }
+
+    if (!(sprinting) && (speed > 1) && (jump == 0)) {
+        speed -= 3/realFPS
+    } else if (!(sprinting) && (speed > 1) && (jump == 1)) {
+        speed -= 0.3/realFPS
+    }
+
+}
+
+function checkKeys() {
+    if ((jump == 0) && (keys["shift"]) && (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1))) {
+        sprinting = 1
+        sprintTimer = 0
+        if (speed < 1.5) {
+            speed += 3/realFPS
         }
+        sprint -= 1/realFPS
+    } else if ((jump == 1) && (keys["shift"]) && (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1))) {
+        sprint -= 1/realFPS
     } else {
-        if (viewAngle > 60) {
-            viewAngle-= 100 / realFPS
-        }
+        sprinting = 0
     }
     
     if ((angle > 360) || (angle < 0)) {
@@ -715,6 +714,8 @@ function mainloop() {
 
     if (!paused) {
 
+        updatePhysics()
+
         checkKeys()
 
         rayCast()
@@ -727,27 +728,45 @@ function mainloop() {
 
     timerr = Date.now() - timerr
 
+    // realFPS = 1000 / timerr
+
+    // document.getElementById("fps").innerText = "fps: " + String(Math.floor(realFPS))
+
+    // setTimeout(mainloop)
+
     if (1000/fps - timerr > 0) {
 
         realFPS = fps
 
-        document.getElementById("fps").innerText = "fps: " + String(fps)
+        document.getElementById("fps").innerText = "This is a backrooms game made from scratch with javascript!! work in progress, this is for my software major project at highschool! fps: " + String(fps)
 
-        setTimeout(mainloop, 1000/fps - timerr)
+        setTimeout(mainloop, Math.floor(1000/fps - timerr))
 
     } else {
 
         realFPS = 1000 / timerr
 
-        document.getElementById("fps").innerText = "fps: " + String(1000/timerr)
+        document.getElementById("fps").innerText = "This is a backrooms game made from scratch with javascript!! work in progress, this is for my software major project at highschool! fps: " + String(1000/timerr)
         
-        setTimeout(mainloop, 0)
+        setTimeout(mainloop)
 
     }
 }
 
 window.addEventListener('keydown', function (e) {
-    keys[String(e.key).toLowerCase()] = true
+    if (!(e.repeat)) {
+        if (String(e.key).toLowerCase() == " ") {
+            e.preventDefault()
+            if (jump == 0) {
+                jump = 1
+                jumpV = 0.02
+            }
+        }
+        if (String(e.key).toLowerCase() == "f") {
+            entities.push(new Entity(mazePosX, mazePosY, tilePosX, tilePosY, entityList[rand(0, entityList.length - 1)]))
+        }
+        keys[String(e.key).toLowerCase()] = true
+    }
 }, false);
 
 window.addEventListener('keyup', function (e) {
@@ -777,31 +796,35 @@ function lockChangeAlert() {
 //store
 const tileSize = 100
 const renderDist = 100
-const spread = 500
+const spread = 150
 const opaqueTiles = [1, 2, 4]
 const wallTiles = [1, 2, 4]
 const opaqueTextures = {1:0, 2:0}
 const debug = 0
 const threeDee = 1
 const floors = 1
+const entitiesSpawn = 1
 const viewRadius = Math.ceil(renderDist / tileSize) + 1
 
 const angus = new Image()
-angus.src = "angus.png"
+angus.src = "images/angus.png"
 
 const roblox = new Image()
-roblox.src = "roblox.png"
+roblox.src = "images/roblox.png"
 
 const obama = new Image()
-obama.src = "obama.png"
+obama.src = "images/obama.png"
 
 const entityList = [angus, roblox, obama]
 
 const L0W1 = new Image()
-L0W1.src = "level_0_wall.png"
+L0W1.src = "images/level_0_wall.png"
 
-const levelTextures = [[L0W1]]
-const roofColours = [{0: "#f2ec7c", 3: "#ffffff"}]
+const L0W2 = new Image()
+L0W2.src = "images/level_0_column.png"
+
+const levelTextures = [{1: L0W1, 2: L0W2}]
+const roofColours = [{0: "#f2ec90", 3: "#ffffff"}]
 
 var width = window.innerWidth - 30;
 var height = window.innerHeight - 30;
@@ -825,11 +848,17 @@ var yOffTop = 0
 var yOffBottom = 0
 var level = 0
 var sprint = 5 // seconds
+var sprinting = 0
 var sprintTimer = 0
 var fps = 60
 var startFlag = true
 var realFPS = 0
 var viewAngle = 60
+var jump = 0
+var jumpV = 0
+var jumpP = 0
+var jumpPress = 0
+var speed = 1
 
 canvas.canvas.width = width;
 canvas.canvas.height = height;
