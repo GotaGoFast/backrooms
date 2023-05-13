@@ -879,12 +879,14 @@ canvas.canvas.height = 500
 L0W1.onload = function () {
     canvas.drawImage(L0W1, 0, 0)
     const L0W1Arr = canvas.getImageData(0, 0, 125, 500) 
+    console.log(L0W1Arr)
     levelTextures2[0][1] = L0W1Arr
 }
 
 L0W2.onload = function () {
     canvas.drawImage(L0W2, 0, 0)
     const L0W2Arr = canvas.getImageData(0, 0, 125, 500)
+    console.log(L0W2Arr)
     levelTextures2[0][2] = L0W2Arr
 }
 
