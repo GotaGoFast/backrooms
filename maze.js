@@ -20,8 +20,20 @@ class Entity {
     }
 }
 
-function hex() {
-    let pp = "pp"
+function hex(input, scale) {
+    let result1 = (Math.round(parseInt(input.slice(1, 3), 16) * scale)).toString(16)
+    let result2 = (Math.round(parseInt(input.slice(3, 5), 16) * scale)).toString(16)
+    let result3 = (Math.round(parseInt(input.slice(5, 7), 16) * scale)).toString(16)
+    if (result1.length == 1) {
+        result1 = "0" + result1
+    }
+    if (result2.length == 1) {
+        result2 = "0" + result1
+    }
+    if (result3.length == 1) {
+        result3 = "0" + result1
+    }
+    return "#" + result1 + result2 + result3
 }
 
 function cropImageData(array, width, sx, sy, swidth, sheight) {
@@ -389,14 +401,12 @@ function rayCast() {
 
             floorDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
             
-            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (roofs[i].length < Math.ceil(renderDist / 2))) {
-                roofs[i].push([(size - (size / floorDist)) / 2 + (size * jumpP / floorDist), exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
+            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (roofs[i].length < Math.ceil(renderDist/2))) {
+                roofs[i].push([floorDist, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
             } else if ((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) {
-                roofs[i][0] = [0, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
-            } else if (roofs[i].length == Math.ceil(renderDist / 2)) {
-                roofs[i].push([(size - (size / floorDist)) / 2 + (size * jumpP / floorDist), 0])
-            } else if ((hit) || (rendDist == renderDist)) {
-                roofs[i].push([(size - (size / floorDist)) / 2 + (size * jumpP / floorDist), 0])
+                roofs[i][0] = [1 - 2 * jumpP, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
+            } else if (hit) {
+                roofs[i].push([floorDist, 0])
             }
 
             rendDist++
@@ -484,15 +494,22 @@ function rayCast() {
     if (floors) {
         canvas.lineWidth = rayWidth
         for (let m = 0; m < roofs.length; m++) {
-            for (let n = 0; n < roofs[m].length-1; n++) {
-                let lining = 0
-                if ((n != roofs[m].length-2) && (roofs[m][n][1] == 0)) {
-                    lining = 1
+            for (let n = 0; n < roofs[m].length - 1; n++) {
+
+                if (roofs[m][n][1] == 0) {
+                    canvas.strokeStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
+                } else {
+                    canvas.strokeStyle = roofColours[level][roofs[m][n][1]]
                 }
-                canvas.strokeStyle = roofColours[level][roofs[m][n][1]]
+
+                // canvas.beginPath()
+
+                // canvas.fillRect(startX + (roofs.length - m-1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth, ((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n+1][0])))
+                
+                // canvas.closePath()
                 canvas.beginPath()
-                canvas.moveTo(startX + (roofs.length - m - 0.5) * size/roofs.length, startY + roofs[m][n][0])
-                canvas.lineTo(startX + (roofs.length - m - 0.5) * size/roofs.length, startY + roofs[m][n+1][0] - lining)
+                canvas.moveTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])))
+                canvas.lineTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.ceil((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])))
                 canvas.stroke()
                 canvas.closePath()
                 canvas.strokeStyle = "#FFFFFF"
@@ -500,7 +517,7 @@ function rayCast() {
                 // canvas.strokeStyle = "#000000"
                 // canvas.lineTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n+1][0] + 1)
                 // canvas.stroke()
-                canvas.closePath()
+                // canvas.closePath()
             }
         }
     }
@@ -518,20 +535,17 @@ function rayCast() {
                 canvas.beginPath()
 
                 if (Math.ceil(rays[l][5] * 125 + rayWidth * 500 / rays[l][1]) <= 125) {
-                    console.log("bruh", levelTextures2[level][rays[l][3]])
 
-                    canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(rays[l][5] * 125), 0, Math.ceil(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
-
-
-
-                    // canvas.drawImage(levelTextures[level][rays[l][3]], Math.floor(rays[l][5] * 125), 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, rays[l][1])
+                    // canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(rays[l][5] * 125), 0, Math.ceil(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
+                    canvas.drawImage(levelTextures[level][rays[l][3]], Math.floor(rays[l][5] * 125), 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
 
                 } else {
-                    canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(125 - rayWidth * 500 / rays[l][1]), 0, Math.floor(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
-
-
-                    // canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, rays[l][1])
+                    // canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(125 - rayWidth * 500 / rays[l][1]), 0, Math.floor(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
+                    canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
                 }
+
+                canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 1 / (rays[l][2] + 1)) + ")"
+                canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), Math.ceil(rayWidth), rays[l][1])
                 
                 // canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
                 // canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
@@ -567,7 +581,7 @@ function rayCast() {
     canvas.fillRect(startX + 0.11 * size, startY + 0.91 * size, 0.18 * size * (sprint/5), 0.03 * size)
 
     canvas.font = String(size/40) + "px Arial"
-    canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))), startX + 0.05 * size, startY + 0.08 * size)
+    canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))), startX + 0.05 * size, startY + 0.18 * size)
 
 
 
@@ -575,12 +589,13 @@ function rayCast() {
 
 
     canvas.fillStyle = "#FFFFFF"
-    canvas.fillRect(0, 0, canvas.canvas.width, (canvas.canvas.height - size) / 2)
-    canvas.fillRect(0, size + (canvas.canvas.height - size) / 2, canvas.canvas.width, (canvas.canvas.height - size) / 2)
+    canvas.fillRect(0, 0, canvas.canvas.width, startY)
+    canvas.fillRect(0, size + startY, canvas.canvas.width, canvas.canvas.height - (size + startY))
 
     canvas.strokeStyle = "#000000"
     canvas.lineWidth = Math.ceil(size/100)
     canvas.strokeRect(startX, startY, size, size)
+    canvas.strokeRect(0, 0, canvas.canvas.width, canvas.canvas.height)
 }
 
 function updatePhysics() {
@@ -749,13 +764,13 @@ function changeWindow() {
         canvas.canvas.height = height;
 
         if (width > height) {
-            startX = (width - height) / 2
+            startX = (width - Math.floor(height / spread) * spread) / 2
             startY = 0
-            size = height
+            size = Math.floor(height / spread) * spread
         } else {
             startX = 0
-            startY = (height - width) / 2
-            size = width
+            startY = (height - Math.floor(width / spread) * spread) / 2
+            size = Math.floor(width / spread) * spread
         }
 
         rayWidth = size / spread
@@ -873,29 +888,6 @@ L0W2.src = "images/level_0_column.png"
 const levelTextures = [{1: L0W1, 2: L0W2}]
 const roofColours = [{0: "#f2ec90", 3: "#ffffff"}]
 
-canvas.canvas.width = 125
-canvas.canvas.height = 500
-
-L0W1.onload = function () {
-    canvas.drawImage(L0W1, 0, 0)
-    const L0W1Arr = canvas.getImageData(0, 0, 125, 500) 
-    console.log(L0W1Arr.data)
-    levelTextures2[0][1] = L0W1Arr
-}
-
-L0W2.onload = function () {
-    canvas.drawImage(L0W2, 0, 0)
-    const L0W2Arr = canvas.getImageData(0, 0, 125, 500)
-    console.log(L0W2Arr.data)
-    levelTextures2[0][2] = L0W2Arr
-}
-
-// var idata = canvas.createImageData(125, 500);
-// idata.data.set(L0W1Arr);
-// canvas.putImageData(idata, 0, 0);
-
-const levelTextures2 = [{1: "", 2: ""}]
-
 var width = window.innerWidth - 30;
 var height = window.innerHeight - 30;
 var rayWidth = 0
@@ -932,14 +924,16 @@ var speed = 1
 var annoying = 0
 var testTimer = 0
 
-// canvas.beginPath()
-// canvas.font = "60px Arial"
-// canvas.strokeStyle = "#000000"
-// canvas.textAlign = "center"
-// canvas.fillText("Click here to start", width / 2, height / 2)
-// canvas.strokeText("Click here to start", width / 2, height / 2)
-// canvas.textAlign = "start"
-// canvas.closePath()
+changeWindow()
+
+canvas.beginPath()
+canvas.font = "60px Arial"
+canvas.strokeStyle = "#000000"
+canvas.textAlign = "center"
+canvas.fillText("Click here to start", width / 2, height / 2)
+canvas.strokeText("Click here to start", width / 2, height / 2)
+canvas.textAlign = "start"
+canvas.closePath()
 
 c.addEventListener("click", async () => {
     if (canClick) {
