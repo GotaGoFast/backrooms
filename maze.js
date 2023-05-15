@@ -591,6 +591,7 @@ function rayCast() {
 
                 // canvas.fillRect(startX + (roofs.length - m-1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth, Math.floor((size - (size / (roofs[m][n+1][0] - roofs[m][n+1][0]))) / 2))
                 canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
+                
                 canvas.closePath()
                 // canvas.beginPath()
                 // canvas.moveTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])))
@@ -629,7 +630,7 @@ function rayCast() {
                 }
 
                 canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 1 / (rays[l][2] + 1)) + ")"
-                canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 1)
+                canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 2)
                 
                 // canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
                 // canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
@@ -656,7 +657,7 @@ function rayCast() {
         } 
     }
 
-    canvas.fillStyle = "#FF0000"
+    canvas.fillStyle = "#000000"
     canvas.fillRect(startX + 0.1 * size, startY + 0.9 * size, 0.2 * size, 0.05 * size)
 
     canvas.fillStyle = "#FFFFFF"
@@ -700,14 +701,15 @@ function updatePhysics() {
     }
 
     if (jump == 1) {
-        jumpV -= 0.08 * deltaTime
 
-        jumpP += jumpV
+        jumpP = 1.4 * timeSinceJump - 1.75 * timeSinceJump * timeSinceJump
 
         if (jumpP < 0) {
             jumpP = 0
-            jumpV = 0
             jump = 0
+            timeSinceJump = 0
+        } else {
+            timeSinceJump += deltaTime
         }
     }
 
@@ -960,7 +962,6 @@ window.addEventListener('keydown', function (e) {
             e.preventDefault()
             if (jump == 0) {
                 jump = 1
-                jumpV = 0.03
             }
         }
         if (String(e.key).toLowerCase() == "f") {
@@ -1082,6 +1083,7 @@ var jump = 0
 var jumpV = 0
 var jumpP = 0
 var jumpPress = 0
+var timeSinceJump = 0
 var speed = 1
 var annoying = 0
 var deltaTimer = 0
