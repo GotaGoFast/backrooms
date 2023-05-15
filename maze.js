@@ -36,18 +36,18 @@ function hex(input, scale) {
     return "#" + result1 + result2 + result3
 }
 
-function cropImageData(array, width, sx, sy, swidth, sheight) {
-    let result = []
-    for (let y = sy; y < sy + sheight; y++) {
-        for (let x = sx * 4; x < (sx + swidth) * 4; x++) {
-            result.push(array[4 * y * width + x])
-        }
-    }
-    // console.log(result)
-    result = new ImageData(new Uint8ClampedArray(result), swidth, sheight)
-    // console.log(result.data)
-    return result
-}
+// function cropImageData(array, width, sx, sy, swidth, sheight) {
+//     let result = []
+//     for (let y = sy; y < sy + sheight; y++) {
+//         for (let x = sx * 4; x < (sx + swidth) * 4; x++) {
+//             result.push(array[4 * y * width + x])
+//         }
+//     }
+//     // console.log(result)
+//     result = new ImageData(new Uint8ClampedArray(result), swidth, sheight)
+//     // console.log(result.data)
+//     return result
+// }
 
 function convertArr(arr, x, y) {
     let result = []
@@ -486,13 +486,13 @@ function rayCast() {
 
             floorDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
             
-            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0)) {
+            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (rendDist < renderDist / 2)) {
                 roofs[i].push([floorDist, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
-            } else if ((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) {
+            } else if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) && (rendDist < renderDist / 2)) {
                 roofs[i][0] = [1 - 2 * jumpP, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
-            // } else if (rendDist == renderDist) {
-            //     roofs[i].push([floorDist, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
-            // } else if ((hit) && (floorDist > renderDist / 5)) {
+            } else if (rendDist == renderDist / 2) {
+                roofs[i][roofs[i].length - 1] = [floorDist, 0]
+            // } else if ((hit) && (rendDist > renderDist / 5)) {
             //     roofs[i].push([floorDist, 0])
             }
 
@@ -579,10 +579,17 @@ function rayCast() {
     if (floors) {
         canvas.lineWidth = rayWidth
         for (let m = 0; m < roofs.length; m++) {
+            if (roofs[m].length >= renderDist) {
+                console.log(roofs[m], roofs[m].length)
+            }
             for (let n = 0; n < roofs[m].length - 1; n++) {
 
                 if (!(roofs[m][n][1] == 3)) {
-                    canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
+                    if (!keys["b"]) {
+                        canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
+                    } else {
+                        canvas.fillStyle = roofColours[level][roofs[m][n][1]]
+                    }
                 } else {
                     canvas.fillStyle = roofColours[level][roofs[m][n][1]]
                 }
@@ -671,7 +678,7 @@ function rayCast() {
     canvas.font = String(size/15) + "px Arial"
     canvas.textAlign = "center"
     if ((winOption == 1) && (opened == 0)) {
-        canvas.fillText("Press 'O' to open door", startX + 0.5 * size, startY + 0.5 * size)
+        canvas.fillText("Press 'E' to open door", startX + 0.5 * size, startY + 0.5 * size)
     }
 
     if (win == 1) {
@@ -974,7 +981,7 @@ window.addEventListener('keydown', function (e) {
                 render = 1
             }
         }
-        if ((String(e.key).toLowerCase() == "o") && (winOption == 1)) {
+        if ((String(e.key).toLowerCase() == "e") && (winOption == 1)) {
             opaqueTiles.splice(opaqueTiles.indexOf(6), 1)
             wallTiles.splice(wallTiles.indexOf(6), 1)
             opened = 1
