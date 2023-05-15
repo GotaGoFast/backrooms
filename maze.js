@@ -104,7 +104,7 @@ function allowResume() {
 function menu() {
     if (paused) {
         canvas.beginPath()
-        canvas.font = "60px Arial"
+        canvas.font = String(size / 10) + "px Arial"
         canvas.strokeStyle = "#000000"
         canvas.textAlign = "center"
         canvas.fillText("Click here to resume", width / 2, height / 2)
@@ -163,53 +163,138 @@ function generateTile() { //generates a tile of size [tileSize]
         tile.push(row)
     }
 
-    let density = tileSize * tileSize * 0.002
-    for (let i = 0; i < density; i++) {
-        let length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
-        let wallX = rand(0, tileSize - 1)
-        let wallY = rand(0, tileSize - length)
-        for (let j = 0; j < length; j++) {
-            tile[wallX][wallY + j] = 1
-        }
-        length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
-        wallX = rand(0, tileSize - 1)
-        wallY = rand(0, tileSize - length)
-        for (let j = 0; j < length; j++) {
-            tile[wallY + j][wallX] = 1
+
+    let picker = rand(0, 100)
+
+    if (level == 0) {
+        // if (picker < 50) {
+
+            let density = tileSize * tileSize * 0.002
+            for (let i = 0; i < density; i++) {
+                let length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
+                let wallX = rand(0, tileSize - 1)
+                let wallY = rand(0, tileSize - length)
+                for (let j = 0; j < length; j++) {
+                    tile[wallX][wallY + j] = 1
+                }
+                length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
+                wallX = rand(0, tileSize - 1)
+                wallY = rand(0, tileSize - length)
+                for (let j = 0; j < length; j++) {
+                    tile[wallY + j][wallX] = 1
+                }
+            }
+
+            let columns = rand(0, Math.ceil(tileSize * tileSize * 0.005))
+            for (let i = 0; i < columns; i++) {
+                wallX = rand(1, tileSize - 2)
+                wallY = rand(1, tileSize - 2)
+                while ((tile[wallX][wallY] == 1) && (tile[wallX][wallY+1] == 1) && (tile[wallX][wallY-1] == 1) && (tile[wallX+1][wallY] == 1) && (tile[wallX+1][wallY+1] == 1) && (tile[wallX+1][wallY-1] == 1) && (tile[wallX-1][wallY] == 1) && (tile[wallX-1][wallY+1] == 1) && (tile[wallX-1][wallY-1] == 1)) {
+                    wallX = rand(1, tileSize - 2)
+                    wallY = rand(1, tileSize - 2)
+                }
+                tile[wallX][wallY] = 2
+            }
+
+            let lights = rand(1, Math.floor(tileSize * tileSize * 0.01))
+            for (let i = 0; i < lights; i++) {
+                let rando = rand(0, tileSize - 2)
+                let rando2 = rand(0, tileSize - 2)
+                if (!(wallTiles.includes(tile[rando][rando2]))) {
+                    tile[rando][rando2] = 3
+                }
+                if (!(wallTiles.includes(tile[rando+1][rando2]))) {
+                    tile[rando+1][rando2] = 3
+                }
+                if (!(wallTiles.includes(tile[rando+1][rando2+1]))) {
+                    tile[rando+1][rando2+1] = 3
+                }
+                if (!(wallTiles.includes(tile[rando][rando2+1]))) {
+                    tile[rando][rando2+1] = 3
+                }
+
+            }
+        if (picker < 50) {
+            let spotX = rand(0, tileSize - 4)
+            let spotY = rand(0, tileSize - 4)
+            tile[spotY][spotX] = 5
+            tile[spotY+1][spotX] = 5
+            tile[spotY+2][spotX] = 5
+            tile[spotY+3][spotX] = 5
+            tile[spotY+3][spotX+1] = 5
+            tile[spotY+3][spotX+2] = 5
+            tile[spotY+3][spotX+3] = 5
+            tile[spotY][spotX+1] = 5
+            tile[spotY][spotX+2] = 5
+            tile[spotY][spotX+3] = 5
+            tile[spotY + 1][spotX + 3] = 6
+            tile[spotY + 2][spotX + 3] = 6
+            tile[spotY + 1][spotX + 1] = 7
+            tile[spotY + 2][spotX + 1] = 7
+            tile[spotY + 1][spotX + 2] = 8
+            tile[spotY + 2][spotX + 2] = 8
         }
     }
 
-    let columns = rand(0, Math.ceil(tileSize * tileSize * 0.005))
-    for (let i = 0; i < columns; i++) {
-        wallX = rand(1, tileSize - 2)
-        wallY = rand(1, tileSize - 2)
-        while ((tile[wallX][wallY] == 1) && (tile[wallX][wallY+1] == 1) && (tile[wallX][wallY-1] == 1) && (tile[wallX+1][wallY] == 1) && (tile[wallX+1][wallY+1] == 1) && (tile[wallX+1][wallY-1] == 1) && (tile[wallX-1][wallY] == 1) && (tile[wallX-1][wallY+1] == 1) && (tile[wallX-1][wallY-1] == 1)) {
-            wallX = rand(1, tileSize - 2)
-            wallY = rand(1, tileSize - 2)
-        }
-        tile[wallX][wallY] = 2
-    }
+    return tile
 
-    let lights = rand(1, Math.floor(tileSize * tileSize * 0.01))
-    for (let i = 0; i < lights; i++) {
-        let rando = rand(0, tileSize - 2)
-        let rando2 = rand(0, tileSize - 2)
-        if (!(wallTiles.includes(tile[rando][rando2]))) {
-            tile[rando][rando2] = 3
-        }
-        if (!(wallTiles.includes(tile[rando+1][rando2]))) {
-            tile[rando+1][rando2] = 3
-        }
-        if (!(wallTiles.includes(tile[rando+1][rando2+1]))) {
-            tile[rando+1][rando2+1] = 3
-        }
-        if (!(wallTiles.includes(tile[rando][rando2+1]))) {
-            tile[rando][rando2+1] = 3
-        }
+    // let tile = []
 
-    }
+    // for (let i = 0; i < tileSize; i++) {
+    //     let row = []
+    //     for (let j = 0; j < tileSize; j++) {
+    //         row.push(0)
+    //     }
+    //     tile.push(row)
+    // }
 
-    return tile //as per [tileSize]
+    // let density = tileSize * tileSize * 0.002
+    // for (let i = 0; i < density; i++) {
+    //     let length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
+    //     let wallX = rand(0, tileSize - 1)
+    //     let wallY = rand(0, tileSize - length)
+    //     for (let j = 0; j < length; j++) {
+    //         tile[wallX][wallY + j] = 1
+    //     }
+    //     length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
+    //     wallX = rand(0, tileSize - 1)
+    //     wallY = rand(0, tileSize - length)
+    //     for (let j = 0; j < length; j++) {
+    //         tile[wallY + j][wallX] = 1
+    //     }
+    // }
+
+    // let columns = rand(0, Math.ceil(tileSize * tileSize * 0.005))
+    // for (let i = 0; i < columns; i++) {
+    //     wallX = rand(1, tileSize - 2)
+    //     wallY = rand(1, tileSize - 2)
+    //     while ((tile[wallX][wallY] == 1) && (tile[wallX][wallY+1] == 1) && (tile[wallX][wallY-1] == 1) && (tile[wallX+1][wallY] == 1) && (tile[wallX+1][wallY+1] == 1) && (tile[wallX+1][wallY-1] == 1) && (tile[wallX-1][wallY] == 1) && (tile[wallX-1][wallY+1] == 1) && (tile[wallX-1][wallY-1] == 1)) {
+    //         wallX = rand(1, tileSize - 2)
+    //         wallY = rand(1, tileSize - 2)
+    //     }
+    //     tile[wallX][wallY] = 2
+    // }
+
+    // let lights = rand(1, Math.floor(tileSize * tileSize * 0.01))
+    // for (let i = 0; i < lights; i++) {
+    //     let rando = rand(0, tileSize - 2)
+    //     let rando2 = rand(0, tileSize - 2)
+    //     if (!(wallTiles.includes(tile[rando][rando2]))) {
+    //         tile[rando][rando2] = 3
+    //     }
+    //     if (!(wallTiles.includes(tile[rando+1][rando2]))) {
+    //         tile[rando+1][rando2] = 3
+    //     }
+    //     if (!(wallTiles.includes(tile[rando+1][rando2+1]))) {
+    //         tile[rando+1][rando2+1] = 3
+    //     }
+    //     if (!(wallTiles.includes(tile[rando][rando2+1]))) {
+    //         tile[rando][rando2+1] = 3
+    //     }
+
+    // }
+
+    // return tile //as per [tileSize]
 }
 
 function initialiseMaze() { //creates initial maze and tiles
@@ -284,6 +369,7 @@ function rayCast() {
     let distInWall = 0 //distance in wall
     let roofs = []
     let floorDist = 0
+    winOption = 0
 
     if (debug == 1) {
         canvas.beginPath()
@@ -390,23 +476,24 @@ function rayCast() {
             }
 
             if (hit == false) {
-                try {
-                    if (opaqueTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX])) {
-                        hit = true
-                    }
-                } catch {
+                if (opaqueTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX])) {
                     hit = true
+                }
+                if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6) && (rendDist < 5)) {
+                    winOption = 1
                 }
             }
 
             floorDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
             
-            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (roofs[i].length < Math.ceil(renderDist/2))) {
+            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0)) {
                 roofs[i].push([floorDist, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
             } else if ((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) {
                 roofs[i][0] = [1 - 2 * jumpP, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
-            } else if (hit) {
-                roofs[i].push([floorDist, 0])
+            // } else if (rendDist == renderDist) {
+            //     roofs[i].push([floorDist, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
+            // } else if ((hit) && (floorDist > renderDist / 5)) {
+            //     roofs[i].push([floorDist, 0])
             }
 
             rendDist++
@@ -444,18 +531,16 @@ function rayCast() {
     let plaTotalX = 0
     let plaTotalY = 0
 
-    let gradient1 = canvas.createLinearGradient(size/2, 0, size/2, size)
-    gradient1.addColorStop(0, "#e6e685")
-    gradient1.addColorStop(1, "#8c8c32")
-
     canvas.beginPath()
-    canvas.fillStyle = gradient1
+    canvas.fillStyle = "#000000"
     canvas.fillRect(startX, startY, size, size/2)
-    let gradient2 = canvas.createLinearGradient(size/2, 0, size/2, size)
-    gradient2.addColorStop(0, "#61631b")
-    gradient2.addColorStop(1, "#bec242")
-    canvas.fillStyle = gradient2
+
+    let gradient = canvas.createLinearGradient(startX + size / 2, startY + size / 2, startX + size / 2, startY + size)
+    gradient.addColorStop(0, "#000000")
+    gradient.addColorStop(1, "#bec242")
+    canvas.fillStyle = gradient
     canvas.fillRect(startX, startY + size/2, size, size/2)
+
     canvas.closePath()
 
 
@@ -496,23 +581,23 @@ function rayCast() {
         for (let m = 0; m < roofs.length; m++) {
             for (let n = 0; n < roofs[m].length - 1; n++) {
 
-                if (roofs[m][n][1] == 0) {
-                    canvas.strokeStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
+                if (!(roofs[m][n][1] == 3)) {
+                    canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
                 } else {
-                    canvas.strokeStyle = roofColours[level][roofs[m][n][1]]
+                    canvas.fillStyle = roofColours[level][roofs[m][n][1]]
                 }
 
-                // canvas.beginPath()
-
-                // canvas.fillRect(startX + (roofs.length - m-1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth, ((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n+1][0])))
-                
-                // canvas.closePath()
                 canvas.beginPath()
-                canvas.moveTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])))
-                canvas.lineTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.ceil((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])))
-                canvas.stroke()
+
+                // canvas.fillRect(startX + (roofs.length - m-1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth, Math.floor((size - (size / (roofs[m][n+1][0] - roofs[m][n+1][0]))) / 2))
+                canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
                 canvas.closePath()
-                canvas.strokeStyle = "#FFFFFF"
+                // canvas.beginPath()
+                // canvas.moveTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])))
+                // canvas.lineTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.ceil((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])))
+                // canvas.stroke()
+                // canvas.closePath()
+                // canvas.strokeStyle = "#FFFFFF"
                 // canvas.beginPath()
                 // canvas.strokeStyle = "#000000"
                 // canvas.lineTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n+1][0] + 1)
@@ -526,7 +611,6 @@ function rayCast() {
     // var idata = canvas.createImageData(125, 500);
     // idata.data.set(L0W1Arr);
     // canvas.putImageData(idata, 0, 0);    
-
     for (let k = 0; k < entitiesHit.length + 1; k++) {
         while ((l < rays.length) && ((k == entitiesHit.length) || (rays[l][4] > entitiesHit[k][2]))) {
             if (threeDee) {
@@ -545,7 +629,7 @@ function rayCast() {
                 }
 
                 canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 1 / (rays[l][2] + 1)) + ")"
-                canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), Math.ceil(rayWidth), rays[l][1])
+                canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 1)
                 
                 // canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
                 // canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
@@ -569,23 +653,31 @@ function rayCast() {
 
             }
 
-        }
-
-        
+        } 
     }
 
-    canvas.fillStyle = "#FFFFFF"
+    canvas.fillStyle = "#FF0000"
     canvas.fillRect(startX + 0.1 * size, startY + 0.9 * size, 0.2 * size, 0.05 * size)
 
-    canvas.fillStyle = "#000000"
+    canvas.fillStyle = "#FFFFFF"
     canvas.fillRect(startX + 0.11 * size, startY + 0.91 * size, 0.18 * size * (sprint/5), 0.03 * size)
 
     canvas.font = String(size/40) + "px Arial"
-    canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))), startX + 0.05 * size, startY + 0.18 * size)
+    if (win == 0) {
+        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " Graphics: " + String(renderModes[render]) + " Current time: " + String(Math.floor((winTimerCumulative + Date.now() - winTimer) / 1000)), startX + 0.05 * size, startY + 0.08 * size)
+    }
 
+    canvas.font = String(size/15) + "px Arial"
+    canvas.textAlign = "center"
+    if ((winOption == 1) && (opened == 0)) {
+        canvas.fillText("Press 'O' to open door", startX + 0.5 * size, startY + 0.5 * size)
+    }
 
-
-
+    if (win == 1) {
+        winTrans += 0.2 * deltaTime
+        canvas.fillStyle = "rgba(255, 255, 255, " + String(winTrans) + ")"
+        canvas.fillRect(startX, startY, size, size)
+    }
 
 
     canvas.fillStyle = "#FFFFFF"
@@ -607,14 +699,16 @@ function updatePhysics() {
         sprint += deltaTime
     }
 
-    jumpV -= 0.08 * deltaTime
+    if (jump == 1) {
+        jumpV -= 0.08 * deltaTime
 
-    jumpP += jumpV
+        jumpP += jumpV
 
-    if (jumpP < 0) {
-        jumpP = 0
-        jumpV = 0
-        jump = 0
+        if (jumpP < 0) {
+            jumpP = 0
+            jumpV = 0
+            jump = 0
+        }
     }
 
     if (!(sprinting) && (speed > 1) && (jump == 0)) {
@@ -626,6 +720,7 @@ function updatePhysics() {
 }
 
 function checkKeys() {
+
     if ((jump == 0) && (keys["shift"]) && (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1))) {
         sprinting = 1
         sprintTimer = 0
@@ -718,6 +813,13 @@ function checkKeys() {
                     collided = 1
                     break
                 }
+                
+                if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][Math.floor(tempTilePosY)][Math.floor(tempTilePosX)] == 7) && !(wallTiles.includes(6))) {
+                    opaqueTiles.push(6)
+                    wallTiles.push(6)
+                    win = 1
+                    winTimerCumulative += Date.now() - winTimer
+                }
             }
 
             if (collided == 1) {
@@ -755,48 +857,86 @@ function checkKeys() {
 
 function changeWindow() {
     if ((window.innerHeight != height) || (window.innerWidth != width)) {
-        width = window.innerWidth - 30;
-        height = window.innerHeight - 60;
+        width = window.innerWidth - 20;
+        height = window.innerHeight - 20;
         startX = 0
         startY = 0
 
         canvas.canvas.width = width;
         canvas.canvas.height = height;
 
+        // if (width > height) {
+        //     startX = (width - Math.floor(height / spread) * spread) / 2
+        //     startY = 0
+        //     size = Math.floor(height / spread) * spread
+        // } else {
+        //     startX = 0
+        //     startY = (height - Math.floor(width / spread) * spread) / 2
+        //     size = Math.floor(width / spread) * spread
+        // }
+        
         if (width > height) {
-            startX = (width - Math.floor(height / spread) * spread) / 2
             startY = 0
-            size = Math.floor(height / spread) * spread
+            size = height - height % render
+            startX = (width - (height - height % render)) / 2
         } else {
             startX = 0
-            startY = (height - Math.floor(width / spread) * spread) / 2
-            size = Math.floor(width / spread) * spread
+            size = width - width % render
+            startY = Math.floor((height - (width - width % render)) / 2)
         }
 
+        spread = size / render
+
         rayWidth = size / spread
+    }
+    
+    if (startFlag) {
+        canvas.fillStyle = "#FFFFFF"
+        canvas.fillRect(0, 0, canvas.canvas.width, startY)
+        canvas.fillRect(0, size + startY, canvas.canvas.width, canvas.canvas.height - (size + startY))
+
+        canvas.strokeStyle = "#000000"
+        canvas.lineWidth = Math.ceil(size/100)
+        canvas.strokeRect(startX, startY, size, size)
+        canvas.strokeRect(0, 0, canvas.canvas.width, canvas.canvas.height)
+
+        canvas.beginPath()
+        canvas.font = String(size / 10) + "px Arial"
+        canvas.fillStyle = "#000000"
+        canvas.textAlign = "center"
+        canvas.fillText("Click here to start", width / 2, height / 2)
+        canvas.textAlign = "start"
+        canvas.closePath()
+    }
+
+    if ((win == 1) && (winTrans >= 1)) {
+        winTrans = 1
+        canvas.fillStyle = "#FFFFFF"
+        canvas.fillRect(startX, startY, size, size)
+        canvas.fillStyle = "#000000"
+        canvas.font = String(size/12) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("congrats, you escaped!", startX + size / 2, startY + size * 0.3)
+        canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.7)
+        canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.5)
+        actualWin = true
+        document.exitPointerLock()
     }
 }
 
 function mainloop() {
 
-    if (!(isNaN((Date.now() - testTimer) / 1000))) {
+    if (!(isNaN((Date.now() - deltaTimer) / 1000))) {
 
-    deltaTime = (Date.now() - testTimer) / 1000
+        deltaTime = (Date.now() - deltaTimer) / 1000
 
     }
 
-    // annoying += (deltaTime)
-
-
-    // if (annoying > 1) {
-    //     console.log("tick")
-    //     annoying = 0
-    // }
-    testTimer = Date.now()
+    deltaTimer = Date.now()
 
     changeWindow()
 
-    if (!paused) {
+    if ((!paused) && (!startFlag) && (!actualWin)) {
 
         updatePhysics()
 
@@ -804,13 +944,14 @@ function mainloop() {
 
         rayCast()
 
-    } else {
+    } else if ((!startFlag) && (!actualWin)) {
 
         menu()
 
     }
-
+    
     requestAnimationFrame(mainloop)
+
 }
 
 window.addEventListener('keydown', function (e) {
@@ -824,6 +965,18 @@ window.addEventListener('keydown', function (e) {
         }
         if (String(e.key).toLowerCase() == "f") {
             entities.push(new Entity(mazePosX, mazePosY, tilePosX, tilePosY, entityList[rand(0, entityList.length - 1)]))
+        }
+        if (String(e.key).toLowerCase() == "n") {
+            if (render < 8) {
+                render+= 2
+            } else {
+                render = 1
+            }
+        }
+        if ((String(e.key).toLowerCase() == "o") && (winOption == 1)) {
+            opaqueTiles.splice(opaqueTiles.indexOf(6), 1)
+            wallTiles.splice(wallTiles.indexOf(6), 1)
+            opened = 1
         }
         keys[String(e.key).toLowerCase()] = true
     }
@@ -844,27 +997,30 @@ function updatePosition(e) {
 }
 
 function lockChangeAlert() {
-    if (document.pointerLockElement === c) {
+    if (document.pointerLockElement === c) { //going from a pause menu to the game
         document.addEventListener("mousemove", updatePosition, false);
         paused = false
-    } else {
+        winTimer = Date.now()
+    } else { //going from the game to a pause menu
         document.removeEventListener("mousemove", updatePosition, false);
-        paused = true
-        setTimeout(allowResume, 1500)
+        if (win == 0) { //only allows pause if gamer hasnt won yet
+            winTimerCumulative += Date.now() - winTimer
+            paused = true
+            setTimeout(allowResume, 1500)
+        }
     }
 }
 //store
 const tileSize = 100
 const renderDist = 100
-const spread = 250
-const opaqueTiles = [1, 2, 4]
-const wallTiles = [1, 2, 4]
-const opaqueTextures = {1:0, 2:0}
+var opaqueTiles = [1, 2, 4, 5, 6]
+var wallTiles = [1, 2, 4, 5, 6]
 const debug = 0
 const threeDee = 1
 const floors = 1
 const entitiesSpawn = 1
-const viewRadius = Math.ceil(renderDist / tileSize) + 1
+const viewRadius = Math.ceil(renderDist/tileSize) + 1
+const renderModes = ["", "super high", "", "high", "", "medium", "", "low", "", "ultra low"]
 
 const angus = new Image()
 angus.src = "images/angus.png"
@@ -885,8 +1041,14 @@ const L0W2 = new Image()
 L0W2.src = "images/level_0_column.png"
 // L0W2.crossOrigin = "Anonymous"
 
-const levelTextures = [{1: L0W1, 2: L0W2}]
-const roofColours = [{0: "#f2ec90", 3: "#ffffff"}]
+const L0W3 = new Image()
+L0W3.src = "images/level_0_elevator_wall.png"
+
+const L0W4 = new Image()
+L0W4.src = "images/level_0_elevator_door.png"
+
+const levelTextures = [{1: L0W1, 2: L0W2, 5: L0W3, 6: L0W4}]
+const roofColours = [{0: "#f2ec90", 3: "#ffffff", 6: "#666459", 7: "#666459", 8: "#666459"}]
 
 var width = window.innerWidth - 30;
 var height = window.innerHeight - 30;
@@ -901,6 +1063,7 @@ var mazePosY = viewRadius
 var angle = 0
 var keys = {}
 var entities = []
+var level = 0
 var exploredTiles = initialiseMaze()
 var paused = true
 var interval = 0
@@ -908,7 +1071,6 @@ var canClick = true
 var yOffAngle = 0
 var yOffTop = 0
 var yOffBottom = 0
-var level = 0
 var sprint = 5 // seconds
 var sprinting = 0
 var sprintTimer = 0
@@ -922,25 +1084,23 @@ var jumpP = 0
 var jumpPress = 0
 var speed = 1
 var annoying = 0
-var testTimer = 0
-
-changeWindow()
-
-canvas.beginPath()
-canvas.font = "60px Arial"
-canvas.strokeStyle = "#000000"
-canvas.textAlign = "center"
-canvas.fillText("Click here to start", width / 2, height / 2)
-canvas.strokeText("Click here to start", width / 2, height / 2)
-canvas.textAlign = "start"
-canvas.closePath()
+var deltaTimer = 0
+var render = 3
+var spread = 250
+var winOption = 0
+var opened = 0
+var win = 0
+var winTrans = 0
+var actualWin = false
+var winTimer = 0
+var winTimerCumulative = 0
 
 c.addEventListener("click", async () => {
-    if (canClick) {
+    if ((canClick) && (win == 0)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
         canClick = false
         if (startFlag) {
             startFlag = false
-            mainloop()
+            winTimer = Date.now()
         }
         paused = false
         keys = {}
@@ -953,3 +1113,5 @@ c.addEventListener("click", async () => {
 })
 
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
+
+mainloop()

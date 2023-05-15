@@ -12,7 +12,7 @@ TILE CODES
 - wall type
 - special texture
 
-3 = air tile with special ceiling
+3 = air tile with LIGHT ceiling
 - transparent
 - air type
 - special ceiling colour
@@ -22,8 +22,24 @@ TILE CODES
 - wall type
 - no texture
 
-MOOD CODES
-0 = idle
-1 = roaming
-2 = chasing
-3 = finding
+5 = elevator walls
+- opaque
+- wall type
+- elevator texture
+
+6 - elevator shaft
+- switches between opaque and transparent
+- switches between wall type and air type
+- when opaque and wall type, elevator door texture
+- when transparent and air type, elevator ceiling colour
+
+7 - elevator trigger
+- transparent
+- air type
+- elevator ceiling colour
+- triggers 6 to close / open
+
+8 - elevator air tile
+- transparent
+- air type
+- elevator ceiling colour
