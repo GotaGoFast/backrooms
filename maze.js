@@ -232,6 +232,13 @@ function generateTile() { //generates a tile of size [tileSize]
             tile[spotY + 1][spotX + 2] = 8
             tile[spotY + 2][spotX + 2] = 8
         // }
+
+        let randEnt = rand(0, entityList.length - 1)
+        entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
+        randEnt = rand(0, entityList.length - 1)
+        entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
+        randEnt = rand(0, entityList.length - 1)
+        entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
     }
 
     return tile
@@ -306,12 +313,6 @@ function initialiseMaze() { //creates initial maze and tiles
         maze.push(row) //adds rows to maze
     }
     maze[mazePosY][mazePosX][Math.floor(tilePosY)][Math.floor(tilePosX)] = 0 //making sure player doesn't spawn in a block
-    let randEnt = rand(0, entityList.length - 1)
-    entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
-    randEnt = rand(0, entityList.length - 1)
-    entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
-    randEnt = rand(0, entityList.length - 1)
-    entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
 
 
 
@@ -588,8 +589,6 @@ function rayCast() {
     rays.reverse()
     entitiesHit.reverse()
 
-    if (!dead) {
-
     if (floors) {
         canvas.lineWidth = rayWidth
         for (let m = 0; m < roofs.length; m++) {
@@ -664,9 +663,9 @@ function rayCast() {
                 canvas.beginPath()
                 // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
                 // canvas.stroke()
-                canvas.drawImage(entitiesHit[k][1], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2, size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
-                canvas.globalAlpha = 1 - 2 / (entitiesHit[k][2] + 6)
-                canvas.drawImage(entitiesHit[k][3], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2, size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+                canvas.drawImage(entitiesHit[k][1], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+                canvas.globalAlpha = 1 - 10 / (entitiesHit[k][2] + 5)
+                canvas.drawImage(entitiesHit[k][3], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
                 canvas.globalAlpha = 1
                 
                 canvas.closePath()
@@ -697,7 +696,6 @@ function rayCast() {
         winTrans += 0.2 * deltaTime
         canvas.fillStyle = "rgba(255, 255, 255, " + String(winTrans) + ")"
         canvas.fillRect(startX, startY, size, size)
-    }
     }
 
 
@@ -946,6 +944,14 @@ function changeWindow() {
         actualWin = true
         document.exitPointerLock()
     }
+
+    if (dead) {
+        canvas.font = String(size/12) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("you died", startX + size / 2, startY + size * 0.3)
+        canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.7)
+        canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.5)
+    }
 }
 
 function mainloop() {
@@ -960,7 +966,7 @@ function mainloop() {
 
     changeWindow()
 
-    if ((!paused) && (!startFlag) && (!actualWin)) {
+    if ((!paused) && (!startFlag) && (!actualWin) && (!dead)) {
 
         updatePhysics()
 
@@ -968,7 +974,7 @@ function mainloop() {
 
         rayCast()
 
-    } else if ((!startFlag) && (!actualWin)) {
+    } else if ((!startFlag) && (!actualWin) && (!dead)) {
 
         menu()
 
@@ -987,7 +993,7 @@ window.addEventListener('keydown', function (e) {
             }
         }
         if (String(e.key).toLowerCase() == "f") {
-            randEnt = rand(0, entityList.length - 1)
+            // randEnt = rand(0, entityList.length - 1)
             // entities.push(new Entity(mazePosX, mazePosY, tilePosX, tilePosY, entityList[randEnt], shadowList[randEnt]))
         }
         if (String(e.key).toLowerCase() == "n") {
@@ -1128,6 +1134,7 @@ var actualWin = false
 var winTimer = 0
 var winTimerCumulative = 0
 var dead = false
+var jumpscare = 0
 
 c.addEventListener("click", async () => {
     if ((canClick) && (win == 0)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
