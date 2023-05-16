@@ -2,21 +2,15 @@ var c = document.getElementById("canvas"); //getting the canvas
 var canvas = c.getContext("2d"); //getting canvas context
 
 class Entity {
-    constructor(mazePosX, mazePosY, tilePosX, tilePosY, type) {
+    constructor(mazePosX, mazePosY, tilePosX, tilePosY, type, shadow) {
         this.eMazePosX = mazePosX
         this.eMazePosY = mazePosY
         this.eTilePosX = tilePosX
         this.eTilePosY = tilePosY
         this.type = type
         this.mood = 0
-        this.eAngle = 0
         this.playerDist = 0
-    }
-
-    updateEntity() {
-        if (self.type == "idle") {
-            this.angle++
-        }
+        this.shadow = shadow
     }
 }
 
@@ -28,10 +22,10 @@ function hex(input, scale) {
         result1 = "0" + result1
     }
     if (result2.length == 1) {
-        result2 = "0" + result1
+        result2 = "0" + result2
     }
     if (result3.length == 1) {
-        result3 = "0" + result1
+        result3 = "0" + result3
     }
     return "#" + result1 + result2 + result3
 }
@@ -117,6 +111,10 @@ function menu() {
 
 function rad(val) {
     return val * (Math.PI / 180)
+}
+
+function deg(val) {
+    return val / (Math.PI / 180)
 }
 
 function degrees(val) {
@@ -214,7 +212,7 @@ function generateTile() { //generates a tile of size [tileSize]
                 }
 
             }
-        if (picker < 50) {
+        // if (picker < 50) {
             let spotX = rand(0, tileSize - 4)
             let spotY = rand(0, tileSize - 4)
             tile[spotY][spotX] = 5
@@ -233,7 +231,7 @@ function generateTile() { //generates a tile of size [tileSize]
             tile[spotY + 2][spotX + 1] = 7
             tile[spotY + 1][spotX + 2] = 8
             tile[spotY + 2][spotX + 2] = 8
-        }
+        // }
     }
 
     return tile
@@ -308,8 +306,15 @@ function initialiseMaze() { //creates initial maze and tiles
         maze.push(row) //adds rows to maze
     }
     maze[mazePosY][mazePosX][Math.floor(tilePosY)][Math.floor(tilePosX)] = 0 //making sure player doesn't spawn in a block
-    // entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[rand(0, entityList.length - 1)]))
-    
+    let randEnt = rand(0, entityList.length - 1)
+    entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
+    randEnt = rand(0, entityList.length - 1)
+    entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
+    randEnt = rand(0, entityList.length - 1)
+    entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
+
+
+
     return maze //4d list
 }
 
@@ -479,25 +484,23 @@ function rayCast() {
                 if (opaqueTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX])) {
                     hit = true
                 }
-                if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6) && (rendDist < 5)) {
+                if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6) && (rendDist < 5) && (opened == 0)) {
                     winOption = 1
                 }
             }
 
             floorDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
             
-            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (rendDist < renderDist / 2)) {
+            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (roofs[i].length < Math.floor(renderDist / 2))) {
                 roofs[i].push([floorDist, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
-            } else if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) && (rendDist < renderDist / 2)) {
+            } else if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) && (roofs[i].length < Math.floor(renderDist / 2))) {
                 roofs[i][0] = [1 - 2 * jumpP, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
-            } else if (rendDist == renderDist / 2) {
-                roofs[i][roofs[i].length - 1] = [floorDist, 0]
-            // } else if ((hit) && (rendDist > renderDist / 5)) {
+            // } else if (roofs[i].length == Math.floor(renderDist / 2)) {
             //     roofs[i].push([floorDist, 0])
             }
-
             rendDist++
         }
+
 
         wallType = exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]
 
@@ -519,7 +522,6 @@ function rayCast() {
         // wallType = levelTextures[level][opaqueTextures[exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]]
         
         rays.push([i, wallHeight, perpDist, wallType, dist * 4, distInWall])
-
     }
 
     rays.sort(sortFunction)
@@ -545,12 +547,16 @@ function rayCast() {
 
 
     for (k = 0; k < entities.length; k++) {
+        let extraAngle = 0
         entTotalX = tileSize * entities[k].eMazePosX + entities[k].eTilePosX
         entTotalY = tileSize * entities[k].eMazePosY + entities[k].eTilePosY
         plaTotalX = tileSize * mazePosX + tilePosX
         plaTotalY = tileSize * mazePosY + tilePosY
 
         entityDist = Math.pow(Math.pow(entTotalX - plaTotalX, 2) + Math.pow(entTotalY - plaTotalY, 2), 0.5)
+        if (entityDist < 5) {
+            dead = true
+        }
 
         if (entTotalX > plaTotalX) {
             if (entTotalY > plaTotalY) {
@@ -566,8 +572,14 @@ function rayCast() {
             }
         }
 
-        if ((entityDist < renderDist) && (-(viewAngle/2) < angleFrom(angle, entityAngle)) && (angleFrom(angle, entityAngle) < viewAngle/2)) {
-            entitiesHit.push([entityAngle, entities[k].type, entityDist])
+        if (angleFrom(angle, entityAngle) > 0) {
+            extraAngle = - deg(Math.atan(2 / entityDist))
+        } else {
+            extraAngle = + deg(Math.atan(2 / entityDist))
+        }
+
+        if ((entityDist < renderDist) && (-(viewAngle/2) < angleFrom(angle, entityAngle) + extraAngle) && (angleFrom(angle, entityAngle) + extraAngle < viewAngle/2)) {
+            entitiesHit.push([entityAngle, entities[k].type, entityDist, entities[k].shadow])
         }
     }
 
@@ -576,20 +588,16 @@ function rayCast() {
     rays.reverse()
     entitiesHit.reverse()
 
+    if (!dead) {
+
     if (floors) {
         canvas.lineWidth = rayWidth
         for (let m = 0; m < roofs.length; m++) {
-            if (roofs[m].length >= renderDist) {
-                console.log(roofs[m], roofs[m].length)
-            }
             for (let n = 0; n < roofs[m].length - 1; n++) {
+                canvas.fillStyle = "#000000"
 
                 if (!(roofs[m][n][1] == 3)) {
-                    if (!keys["b"]) {
-                        canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
-                    } else {
-                        canvas.fillStyle = roofColours[level][roofs[m][n][1]]
-                    }
+                    canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
                 } else {
                     canvas.fillStyle = roofColours[level][roofs[m][n][1]]
                 }
@@ -657,6 +665,10 @@ function rayCast() {
                 // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
                 // canvas.stroke()
                 canvas.drawImage(entitiesHit[k][1], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2, size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+                canvas.globalAlpha = 1 - 2 / (entitiesHit[k][2] + 6)
+                canvas.drawImage(entitiesHit[k][3], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2, size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+                canvas.globalAlpha = 1
+                
                 canvas.closePath()
 
             }
@@ -686,16 +698,19 @@ function rayCast() {
         canvas.fillStyle = "rgba(255, 255, 255, " + String(winTrans) + ")"
         canvas.fillRect(startX, startY, size, size)
     }
+    }
 
 
     canvas.fillStyle = "#FFFFFF"
-    canvas.fillRect(0, 0, canvas.canvas.width, startY)
-    canvas.fillRect(0, size + startY, canvas.canvas.width, canvas.canvas.height - (size + startY))
+    canvas.fillRect(0, 0, width, startY)
+    canvas.fillRect(0, size + startY, width, height - size - startY)
+    canvas.fillRect(0, startY, startX, size)
+    canvas.fillRect(startX + size, startY, width - size - startX, size)
 
     canvas.strokeStyle = "#000000"
     canvas.lineWidth = Math.ceil(size/100)
     canvas.strokeRect(startX, startY, size, size)
-    canvas.strokeRect(0, 0, canvas.canvas.width, canvas.canvas.height)
+    canvas.strokeRect(0, 0, width, height)
 }
 
 function updatePhysics() {
@@ -972,7 +987,8 @@ window.addEventListener('keydown', function (e) {
             }
         }
         if (String(e.key).toLowerCase() == "f") {
-            entities.push(new Entity(mazePosX, mazePosY, tilePosX, tilePosY, entityList[rand(0, entityList.length - 1)]))
+            randEnt = rand(0, entityList.length - 1)
+            // entities.push(new Entity(mazePosX, mazePosY, tilePosX, tilePosY, entityList[randEnt], shadowList[randEnt]))
         }
         if (String(e.key).toLowerCase() == "n") {
             if (render < 8) {
@@ -982,6 +998,7 @@ window.addEventListener('keydown', function (e) {
             }
         }
         if ((String(e.key).toLowerCase() == "e") && (winOption == 1)) {
+            winOption = 0
             opaqueTiles.splice(opaqueTiles.indexOf(6), 1)
             wallTiles.splice(wallTiles.indexOf(6), 1)
             opened = 1
@@ -1032,14 +1049,21 @@ const renderModes = ["", "super high", "", "high", "", "medium", "", "low", "", 
 
 const angus = new Image()
 angus.src = "images/angus.png"
+const angusOver = new Image()
+angusOver.src = "images/angus_overlay.png"
 
 const roblox = new Image()
 roblox.src = "images/roblox.png"
+const robloxOver = new Image()
+robloxOver.src = "images/roblox_overlay.png"
 
 const obama = new Image()
 obama.src = "images/obama.png"
+const obamaOver = new Image()
+obamaOver.src = "images/obama_overlay.png"
 
 const entityList = [angus, roblox, obama]
+const shadowList = [angusOver, robloxOver, obamaOver]
 
 const L0W1 = new Image()
 L0W1.src = "images/level_0_wall.png"
@@ -1064,8 +1088,8 @@ var rayWidth = 0
 var size = 0
 var startX = 0
 var startY = 0
-var tilePosX = tileSize/2 + 0.5
-var tilePosY = tileSize/2 + 0.5
+var tilePosX = 0.5
+var tilePosY = 0.5
 var mazePosX = viewRadius
 var mazePosY = viewRadius
 var angle = 0
@@ -1094,7 +1118,7 @@ var timeSinceJump = 0
 var speed = 1
 var annoying = 0
 var deltaTimer = 0
-var render = 3
+var render = 5
 var spread = 250
 var winOption = 0
 var opened = 0
@@ -1103,6 +1127,7 @@ var winTrans = 0
 var actualWin = false
 var winTimer = 0
 var winTimerCumulative = 0
+var dead = false
 
 c.addEventListener("click", async () => {
     if ((canClick) && (win == 0)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
