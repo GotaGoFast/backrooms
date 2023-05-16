@@ -149,7 +149,7 @@ function nextInt(value, direction) { //returns what the next int is
     }
 }
 
-function generateTile() { //generates a tile of size [tileSize]
+function generateTile(mazeX, mazeY) { //generates a tile of size [tileSize]
 
     let tile = []
 
@@ -233,12 +233,11 @@ function generateTile() { //generates a tile of size [tileSize]
             tile[spotY + 2][spotX + 2] = 8
         // }
 
-        let randEnt = rand(0, entityList.length - 1)
-        entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
-        randEnt = rand(0, entityList.length - 1)
-        entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
-        randEnt = rand(0, entityList.length - 1)
-        entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
+        if (mazeX != "no") {
+            let randEnt = rand(0, entityList.length - 1)
+            entities.push(new Entity(mazeX, mazeY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
+            console.log(entities)
+        }
     }
 
     return tile
@@ -308,7 +307,7 @@ function initialiseMaze() { //creates initial maze and tiles
     for (let i = 0; i < viewRadius * 2 + 1; i++) { //for each row
         row = [] //reset row
         for (let j = 0; j < viewRadius * 2 + 1; j++) { //for each space in row
-            row.push(generateTile()) //inserts generated tile in row
+            row.push(generateTile("no", "no")) //inserts generated tile in row
         }
         maze.push(row) //adds rows to maze
     }
@@ -320,9 +319,10 @@ function initialiseMaze() { //creates initial maze and tiles
 }
 
 function createMaze() { //generates new maze to suit tiles
+    let currentLength = exploredTiles.length
     if (mazePosX - viewRadius < 0) { //if view radius goes outside to the left
             for (let i = 0; i < exploredTiles.length; i++) {
-                exploredTiles[i].unshift(generateTile()) //add an extra tile to front of row
+                exploredTiles[i].unshift(generateTile(i, 0)) //add an extra tile to front of row
             }
         mazePosX ++
         for (let i = 0; i < entities.length; i++) {
@@ -330,14 +330,14 @@ function createMaze() { //generates new maze to suit tiles
         }
     } else if (mazePosX + viewRadius > exploredTiles[0].length - 1) { //view radius goes outside to the right
         for (let i = 0; i < exploredTiles.length; i++) {
-            exploredTiles[i].push(generateTile()) //add an extra tile to front of row
+            exploredTiles[i].push(generateTile(i, currentLength)) //add an extra tile to front of row
         }
     }
 
     if (mazePosY - viewRadius < 0) { //if view radius goes outside downward
         let row = []
         for (let i = 0; i < exploredTiles[0].length; i++) {
-            row.push(generateTile())
+            row.push(generateTile(0, i))
         }
         exploredTiles.unshift(row) //add empty row to front of list
         mazePosY ++
@@ -347,7 +347,7 @@ function createMaze() { //generates new maze to suit tiles
     } else if (mazePosY + viewRadius > exploredTiles.length - 1) { //if view radius goes oustide upward
         let row = []
         for (let i = 0; i < exploredTiles[0].length; i++) {
-            row.push(generateTile())
+            row.push(generateTile(exploredTiles.length, i))
         }
         exploredTiles.push(row) //add empty row to front of list
     }
@@ -664,7 +664,7 @@ function rayCast() {
                 // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
                 // canvas.stroke()
                 canvas.drawImage(entitiesHit[k][1], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
-                canvas.globalAlpha = 1 - 10 / (entitiesHit[k][2] + 5)
+                canvas.globalAlpha = 1 - 3 / (entitiesHit[k][2] + 3)
                 canvas.drawImage(entitiesHit[k][3], startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
                 canvas.globalAlpha = 1
                 
@@ -873,8 +873,6 @@ function checkKeys() {
         mazePosY ++
         tilePosY -= tileSize
     }
-
-    createMaze()
 }
 
 function changeWindow() {
@@ -946,11 +944,13 @@ function changeWindow() {
     }
 
     if (dead) {
+        winTimerCumulative += Date.now() - winTimer
         canvas.font = String(size/12) + "px Arial"
         canvas.textAlign = "center"
         canvas.fillText("you died", startX + size / 2, startY + size * 0.3)
         canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.7)
         canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.5)
+        document.exitPointerLock()
     }
 }
 
@@ -974,6 +974,8 @@ function mainloop() {
 
         rayCast()
 
+        createMaze()
+
     } else if ((!startFlag) && (!actualWin) && (!dead)) {
 
         menu()
@@ -992,11 +994,11 @@ window.addEventListener('keydown', function (e) {
                 jump = 1
             }
         }
-        if (String(e.key).toLowerCase() == "f") {
+        // if (String(e.key).toLowerCase() == "f") {
             // randEnt = rand(0, entityList.length - 1)
             // entities.push(new Entity(mazePosX, mazePosY, tilePosX, tilePosY, entityList[randEnt], shadowList[randEnt]))
-        }
-        if (String(e.key).toLowerCase() == "n") {
+        // }
+        if (String(e.key).toLowerCase() == "r") {
             if (render < 8) {
                 render+= 2
             } else {
@@ -1152,6 +1154,13 @@ c.addEventListener("click", async () => {
         }
     }
 })
+
+try {
+    yababa = new AudioContext();
+    }
+    catch(e) {
+    alert('Web Audio API is not supported in this browser');
+    }
 
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
 
