@@ -14,10 +14,10 @@ class Entity {
     }
 }
 
-function hex(input, scale) {
-    let result1 = (Math.round(parseInt(input.slice(1, 3), 16) * scale)).toString(16)
-    let result2 = (Math.round(parseInt(input.slice(3, 5), 16) * scale)).toString(16)
-    let result3 = (Math.round(parseInt(input.slice(5, 7), 16) * scale)).toString(16)
+function hex(input, scale) { //converts hex colour to modified hex colour based on a scaling factor
+    let result1 = (Math.round(parseInt(input.slice(1, 3), 16) * scale)).toString(16) //r
+    let result2 = (Math.round(parseInt(input.slice(3, 5), 16) * scale)).toString(16) //g
+    let result3 = (Math.round(parseInt(input.slice(5, 7), 16) * scale)).toString(16) //b
     if (result1.length == 1) {
         result1 = "0" + result1
     }
@@ -27,23 +27,23 @@ function hex(input, scale) {
     if (result3.length == 1) {
         result3 = "0" + result3
     }
-    return "#" + result1 + result2 + result3
+    return "#" + result1 + result2 + result3 //modified rgb
 }
 
-// function cropImageData(array, width, sx, sy, swidth, sheight) {
-//     let result = []
-//     for (let y = sy; y < sy + sheight; y++) {
-//         for (let x = sx * 4; x < (sx + swidth) * 4; x++) {
-//             result.push(array[4 * y * width + x])
-//         }
-//     }
-//     // console.log(result)
-//     result = new ImageData(new Uint8ClampedArray(result), swidth, sheight)
-//     // console.log(result.data)
-//     return result
-// }
+function cropImageData(array, width, sx, sy, swidth, sheight) { //OBSOLETE TEST FUNCTION
+    let result = []
+    for (let y = sy; y < sy + sheight; y++) {
+        for (let x = sx * 4; x < (sx + swidth) * 4; x++) {
+            result.push(array[4 * y * width + x])
+        }
+    }
+    // console.log(result)
+    result = new ImageData(new Uint8ClampedArray(result), swidth, sheight)
+    // console.log(result.data)
+    return result
+}
 
-function convertArr(arr, x, y) {
+function convertArr(arr, x, y) { // OBSOLETE TEST FUNCTION
     let result = []
 
     for (let i = 0; i < arr.length / 4; i+=4) {
@@ -53,7 +53,7 @@ function convertArr(arr, x, y) {
     return result
 }
 
-function sortFunction(a, b) {
+function sortFunction(a, b) { //sort function (only works with index 2 (shortcut lol))
     if (a[2] === b[2]) {
         return 0;
     } else {
@@ -95,19 +95,6 @@ function allowResume() {
     canClick = true
 }
 
-function menu() {
-    if (paused) {
-        canvas.beginPath()
-        canvas.font = String(size / 10) + "px Arial"
-        canvas.strokeStyle = "#000000"
-        canvas.textAlign = "center"
-        canvas.fillText("Click here to resume", width / 2, height / 2)
-        canvas.strokeText("Click here to resume", width / 2, height / 2)
-        canvas.textAlign = "start"
-        canvas.closePath()
-    }
-}
-
 function rad(val) {
     return val * (Math.PI / 180)
 }
@@ -144,7 +131,7 @@ function nextInt(value, direction) { //returns what the next int is
     }
 }
 
-function generateTile(mazeX, mazeY) { //generates a tile of size [tileSize]
+function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
 
     let tile = []
 
@@ -160,7 +147,7 @@ function generateTile(mazeX, mazeY) { //generates a tile of size [tileSize]
     let picker = rand(0, 100)
 
     if (level == 0) {
-        // if (picker < 50) {
+        if (picker < 80) {
 
             let density = tileSize * tileSize * 0.002
             for (let i = 0; i < density; i++) {
@@ -207,38 +194,80 @@ function generateTile(mazeX, mazeY) { //generates a tile of size [tileSize]
                 }
 
             }
-        // if (picker < 50) {
-            let spotX = rand(0, tileSize - 4)
-            let spotY = rand(0, tileSize - 4)
-            tile[spotY][spotX] = 5
-            tile[spotY+1][spotX] = 5
-            tile[spotY+2][spotX] = 5
-            tile[spotY+3][spotX] = 5
-            tile[spotY+3][spotX+1] = 5
-            tile[spotY+3][spotX+2] = 5
-            tile[spotY+3][spotX+3] = 5
-            tile[spotY][spotX+1] = 5
-            tile[spotY][spotX+2] = 5
-            tile[spotY][spotX+3] = 5
-            tile[spotY + 1][spotX + 3] = 6
-            tile[spotY + 2][spotX + 3] = 6
-            tile[spotY + 1][spotX + 1] = 7
-            tile[spotY + 2][spotX + 1] = 7
-            tile[spotY + 1][spotX + 2] = 8
-            tile[spotY + 2][spotX + 2] = 8
-        // }
+            if (picker < 25) {
+                let spotX = rand(0, tileSize - 4)
+                let spotY = rand(0, tileSize - 4)
+                tile[spotY][spotX] = 5
+                tile[spotY+1][spotX] = 5
+                tile[spotY+2][spotX] = 5
+                tile[spotY+3][spotX] = 5
+                tile[spotY+3][spotX+1] = 5
+                tile[spotY+3][spotX+2] = 5
+                tile[spotY+3][spotX+3] = 5
+                tile[spotY][spotX+1] = 5
+                tile[spotY][spotX+2] = 5
+                tile[spotY][spotX+3] = 5
+                tile[spotY + 1][spotX + 3] = 6
+                tile[spotY + 2][spotX + 3] = 6
+                tile[spotY + 1][spotX + 1] = 7
+                tile[spotY + 2][spotX + 1] = 7
+                tile[spotY + 1][spotX + 2] = 8
+                tile[spotY + 2][spotX + 2] = 8
+            }
+        } else {
+            tile = []
+            let roww = []
+            for (i = 0; i < 20; i++) {
+                for (j = 0; j < 5; j++) {
+                    roww = []
+                    if ((j == 0) || (j == 2)) {
+                        for (k = 0; k < 20; k++) {
+                            roww.push(0)
+                            roww.push(1)
+                            roww.push(0)
+                            roww.push(0)
+                            roww.push(0)
+                        }
+                    } else if (j == 1) {
+                        for (k = 0; k < 20; k++) {
+                            roww.push(1)
+                            roww.push(1)
+                            roww.push(1)
+                            roww.push(0)
+                            roww.push(0)
+                        }
+                    } else {
+                        for (k = 0; k < 20; k++) {
+                            roww.push(0)
+                            roww.push(0)
+                            roww.push(0)
+                            if (rand(0, 2) == 1) {
+                                roww.push(3)
+                                roww.push(3)
+                            } else {
+                                roww.push(0)
+                                roww.push(0)
+                            }
+                        }
+                    }
+                    tile.push(roww)
+                }
+            }
+        }
 
+        // if ((mazeX != "no") && (rand(0, 3 - difficulty) == 0)){
         if (mazeX != "no") {
-            // let randEnt = rand(0, entityList.length - 1)
-            // entities.push(new Entity(mazeX, mazeY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
-            // randEnt = rand(0, entityList.length - 1)
-            // entities.push(new Entity(mazeX, mazeY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
-            // randEnt = rand(0, entityList.length - 1)
-            // entities.push(new Entity(mazeX, mazeY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
-        
-        
-        
-        
+            let randEnt = rand(0, entityList.length - 1)
+            let randPos = rand(0, tileSize - 1)
+            let randPos2 = rand(0, tileSize - 1)
+            while (!wallTiles.includes(tile[randPos][randPos2])) {
+                randPos = rand(0, tileSize - 1)
+                randPos2 = rand(0, tileSize - 1)
+            }
+            // console.log("yes")
+            // if (entities.length < 3) {
+                entities.push(new Entity(mazeY, mazeX, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
+            // }
         }
     }
 
@@ -309,14 +338,16 @@ function initialiseMaze() { //creates initial maze and tiles
     for (let i = 0; i < viewRadius * 2 + 1; i++) { //for each row
         row = [] //reset row
         for (let j = 0; j < viewRadius * 2 + 1; j++) { //for each space in row
-            row.push(generateTile(i, j)) //inserts generated tile in row
+            row.push(generateTile("no", "no")) //inserts generated tile in row
         }
         maze.push(row) //adds rows to maze
     }
     maze[mazePosY][mazePosX][Math.floor(tilePosY)][Math.floor(tilePosX)] = 0 //making sure player doesn't spawn in a block
-    let randEnt = rand(0, entityList.length - 1)
-    // entities.push(new Entity(mazePosX, mazeY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnt], shadowList[randEnt]))
-    entities.push(new Entity(mazePosX, mazePosY, 10.5, 10.5, angus, angusOver))
+    let randEnte = rand(0, entityList.length - 1)
+    entities.push(new Entity(mazePosX, mazePosY, tileSize - 0.5, tileSize - 0.5, entityList[randEnte], shadowList[randEnte]))
+    // entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnte], shadowList[randEnte]))
+
+    // entities.push(new Entity(mazePosX, mazePosY, 10.5, 10.5, angus, angusOver))
 
 
 
@@ -332,7 +363,12 @@ function createMaze() { //generates new maze to suit tiles
         mazePosX ++
         for (let i = 0; i < entities.length; i++) {
             entities[i].eMazePosX ++
-            entities[i].targeting[1]++
+            if (entities[i].targeting.length != 0) {
+                entities[i].targeting[1] = entities[i].targeting[1] + 1
+            }
+            if (entities[i].seen.length != 0) {
+                entities[i].seen[1] = entities[i].seen[1] + 1
+            }
         }
     } else if (mazePosX + viewRadius > exploredTiles[0].length - 1) { //view radius goes outside to the right
         for (let i = 0; i < exploredTiles.length; i++) {
@@ -349,7 +385,12 @@ function createMaze() { //generates new maze to suit tiles
         mazePosY ++
         for (let i = 0; i < entities.length; i++) {
             entities[i].eMazePosY ++
-            entities[i].targeting[0]++
+            if (entities[i].targeting.length != 0) {
+                entities[i].targeting[0] = entities[i].targeting[0] + 1
+            }
+            if (entities[i].seen.length != 0) {
+                entities[i].seen[0] = entities[i].seen[0] + 1
+            }
         }
     } else if (mazePosY + viewRadius > exploredTiles.length - 1) { //if view radius goes oustide upward
         let row = []
@@ -532,6 +573,7 @@ function rayCast() {
     }
 
     rays.sort(sortFunction)
+    rays.reverse()
 
     canvas.beginPath()
     canvas.fillStyle = "#000000"
@@ -545,38 +587,34 @@ function rayCast() {
 
     canvas.closePath()
 
-    rays.reverse()
+    canvas.lineWidth = rayWidth
+    for (let m = 0; m < roofs.length; m++) {
+        for (let n = 0; n < roofs[m].length - 1; n++) {
+            canvas.fillStyle = "#000000"
 
-    if (floors) {
-        canvas.lineWidth = rayWidth
-        for (let m = 0; m < roofs.length; m++) {
-            for (let n = 0; n < roofs[m].length - 1; n++) {
-                canvas.fillStyle = "#000000"
-
-                if (!(roofs[m][n][1] == 3)) {
-                    canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
-                } else {
-                    canvas.fillStyle = roofColours[level][roofs[m][n][1]]
-                }
-
-                canvas.beginPath()
-
-                // canvas.fillRect(startX + (roofs.length - m-1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth, Math.floor((size - (size / (roofs[m][n+1][0] - roofs[m][n+1][0]))) / 2))
-                canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
-                
-                canvas.closePath()
-                // canvas.beginPath()
-                // canvas.moveTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])))
-                // canvas.lineTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.ceil((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])))
-                // canvas.stroke()
-                // canvas.closePath()
-                // canvas.strokeStyle = "#FFFFFF"
-                // canvas.beginPath()
-                // canvas.strokeStyle = "#000000"
-                // canvas.lineTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n+1][0] + 1)
-                // canvas.stroke()
-                // canvas.closePath()
+            if (!(roofs[m][n][1] == 3)) {
+                canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
+            } else {
+                canvas.fillStyle = roofColours[level][roofs[m][n][1]]
             }
+
+            canvas.beginPath()
+
+            // canvas.fillRect(startX + (roofs.length - m-1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth, Math.floor((size - (size / (roofs[m][n+1][0] - roofs[m][n+1][0]))) / 2))
+            canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
+            
+            canvas.closePath()
+            // canvas.beginPath()
+            // canvas.moveTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])))
+            // canvas.lineTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.ceil((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])))
+            // canvas.stroke()
+            // canvas.closePath()
+            // canvas.strokeStyle = "#FFFFFF"
+            // canvas.beginPath()
+            // canvas.strokeStyle = "#000000"
+            // canvas.lineTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n+1][0] + 1)
+            // canvas.stroke()
+            // canvas.closePath()
         }
     }
 
@@ -586,30 +624,26 @@ function rayCast() {
     // canvas.putImageData(idata, 0, 0);    
     for (let k = 0; k < entitiesHit.length + 1; k++) {
         while ((l < rays.length) && ((k == entitiesHit.length) || (rays[l][4] > entitiesHit[k][2]))) {
-            if (threeDee) {
+            canvas.beginPath()
 
+            if (Math.ceil(rays[l][5] * 125 + rayWidth * 500 / rays[l][1]) <= 125) {
 
-                canvas.beginPath()
+                // canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(rays[l][5] * 125), 0, Math.ceil(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
+                canvas.drawImage(levelTextures[level][rays[l][3]], Math.floor(rays[l][5] * 125), 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
 
-                if (Math.ceil(rays[l][5] * 125 + rayWidth * 500 / rays[l][1]) <= 125) {
-
-                    // canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(rays[l][5] * 125), 0, Math.ceil(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
-                    canvas.drawImage(levelTextures[level][rays[l][3]], Math.floor(rays[l][5] * 125), 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
-
-                } else {
-                    // canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(125 - rayWidth * 500 / rays[l][1]), 0, Math.floor(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
-                    canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
-                }
-
-                canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 1 / (rays[l][2] + 1)) + ")"
-                canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 2)
-                
-                // canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
-                // canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
-                // canvas.stroke()
-        
-                canvas.closePath()
+            } else {
+                // canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(125 - rayWidth * 500 / rays[l][1]), 0, Math.floor(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
+                canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
             }
+
+            canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 1 / (rays[l][2] + 1)) + ")"
+            canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 2)
+            
+            // canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
+            // canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
+            // canvas.stroke()
+    
+            canvas.closePath()
 
             l++
         }
@@ -622,6 +656,7 @@ function rayCast() {
                 // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
                 // canvas.stroke()
                 canvas.drawImage(entitiesHit[k][1].type, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+                console.log(entitiesHit[k][2], 1 - 3 / (entitiesHit[k][2] + 3))
                 canvas.globalAlpha = 1 - 3 / (entitiesHit[k][2] + 3)
                 canvas.drawImage(entitiesHit[k][1].shadow, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
                 canvas.globalAlpha = 1
@@ -629,7 +664,6 @@ function rayCast() {
                 canvas.closePath()
 
             }
-
         } 
     }
 
@@ -641,13 +675,19 @@ function rayCast() {
 
     canvas.font = String(size/40) + "px Arial"
     if (!win) {
-        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " Graphics: " + String(renderModes[render]) + " Current time: " + String(Math.floor((winTimerCumulative + Date.now() - winTimer) / 1000)), startX + 0.05 * size, startY + 0.08 * size)
+        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Graphics: " + String(renderModes[render]) + " | Mouse sensitivity: " + String(Math.floor(sens * 100) / 100), startX + 0.05 * size, startY + 0.08 * size)
     }
 
     canvas.font = String(size/15) + "px Arial"
     canvas.textAlign = "center"
     if ((winOption == 1) && (opened == 0)) {
         canvas.fillText("Press 'E' to open door", startX + 0.5 * size, startY + 0.5 * size)
+    }
+
+    canvas.fillStyle = "rgba(255, 255, 255, 0.5)"
+    console.log(entityClose)
+    if (rand(0, Math.floor(1/(4 * deltaTime))) != 0) {
+        canvas.fillText(entityClose, startX + 0.5 * size, startY + 0.5 * size)
     }
 
     if (win) {
@@ -670,6 +710,7 @@ function rayCast() {
 }
 
 function updateEntities() {
+    // console.log("ALL ENTITY START \n \n \n \n \n")
     let entityDist = 0
     let entityAngle = 0
     let entTotalX = 0
@@ -682,18 +723,35 @@ function updateEntities() {
     let yDiff = 0
     let target = []
     let hit = 0
+    let extraAngle = 0
 
     entitiesHit = [] //entities seen
     for (k = 0; k < entities.length; k++) {
-        console.log("entity start!!!!!!")
+        entityDist = 0
+        entityAngle = 0
+        entTotalX = 0
+        entTotalX = 0
+        plaTotalX = 0
+        plaTotalY = 0
+        targetTotalX = 0
+        targetTotalY = 0
+        xDiff = 0
+        yDiff = 0
+        target = []
+        hit = 1
+        extraAngle = 0
 
-        let extraAngle = 0
+
+        // console.log("entity start!!!!!!")
+        // console.log("I'm at", entities[k].eMazePosY, entities[k].eMazePosX, entities[k].eTilePosY, entities[k].eTilePosX)
+        // console.log("for reference, the player is at", mazePosY, mazePosX, tilePosY, tilePosX)
         entTotalX = tileSize * entities[k].eMazePosX + entities[k].eTilePosX
         entTotalY = tileSize * entities[k].eMazePosY + entities[k].eTilePosY
         plaTotalX = tileSize * mazePosX + tilePosX
         plaTotalY = tileSize * mazePosY + tilePosY
 
         entityDist = Math.pow(Math.pow(entTotalX - plaTotalX, 2) + Math.pow(entTotalY - plaTotalY, 2), 0.5)
+        console.log("i'm ", entityDist, " away from the player")
 
         if (entityDist < 2) {
             dead = true
@@ -702,16 +760,16 @@ function updateEntities() {
         
         if (entities[k].targeting.length != 0) {
             target = entities[k].targeting
-            console.log("there is currently a target:", target)
-            console.log("and I'm at", entities[k].eMazePosX, entities[k].eMazePosY, entities[k].eTilePosX, entities[k].eTilePosY)
+            // console.log("there is currently a target:", target)
             targetTotalX = tileSize * target[1] + target[3]
             targetTotalY = tileSize * target[0] + target[2]
 
             if ((Math.abs(targetTotalX - entTotalX) < 1) && (Math.abs(targetTotalY - entTotalY) < 1)) {
+                // console.log("im at the target")
                 entities[k].targeting = []
             } else {
-                entities[k].eTilePosX += Math.sign(targetTotalX - entTotalX) * deltaTime * 10
-                entities[k].eTilePosY += Math.sign(targetTotalY - entTotalY) * deltaTime * 10
+                entities[k].eTilePosX += Math.sign(targetTotalX - entTotalX) * deltaTime * (7 + 3 * difficulty)
+                entities[k].eTilePosY += Math.sign(targetTotalY - entTotalY) * deltaTime * (7 + 3 * difficulty)
                 if (entities[k].eTilePosX < 0) {
                     entities[k].eMazePosX --
                     entities[k].eTilePosX += tileSize
@@ -726,86 +784,79 @@ function updateEntities() {
                     entities[k].eMazePosY++
                     entities[k].eTilePosY -= tileSize
                 }
-                console.log("end position", entities[k].eTilePosX, entities[k].eTilePosY)
+                // console.log("end position", entities[k].eMazePosX, entities[k].eMazePosY, entities[k].eTilePosX, entities[k].eTilePosY)
             }
-        } else {
+        } else if (entities[k].seen.length != 0) {
+            // console.log("i dont have a target, but im assigning one now from 'seen':", entities[k].seen)
             entities[k].targeting = entities[k].seen
             entities[k].seen = []
         }
         
+        if (entityDist < renderDist) {
+            entityClose = "be careful..."
+            hit = 0
         
-        xDiff = plaTotalX - entTotalX
-        yDiff = plaTotalY - entTotalY
+            xDiff = plaTotalX - entTotalX
+            yDiff = plaTotalY - entTotalY
 
-        for (let l = 0; l < entityDist; l++) {
-            // console.log(entities[k].eMazePosX, entities[k].eTilePosX, Math.floor((entTotalX + l * xDiff / entityDist) / tileSize), Math.floor((entTotalX + l * xDiff / entityDist) % tileSize))
-            if (opaqueTiles.includes(exploredTiles[Math.floor((entTotalY + l * yDiff / entityDist) / tileSize)][Math.floor((entTotalX + l * xDiff / entityDist) / tileSize)][Math.floor((entTotalY + l * yDiff / entityDist) % tileSize)][Math.floor((entTotalX + l * xDiff / entityDist) % tileSize)])) {
-                hit = 1
-                console.log("hit")
-                break
+
+            for (let l = 0; l < entityDist; l++) {
+                // console.log(Math.floor((entTotalY + l * yDiff / entityDist) / tileSize), Math.floor((entTotalX + l * xDiff / entityDist) / tileSize), Math.floor((entTotalY + l * yDiff / entityDist) % tileSize), Math.floor((entTotalX + l * xDiff / entityDist) % tileSize))
+                if (opaqueTiles.includes(exploredTiles[Math.floor((entTotalY + l * yDiff / entityDist) / tileSize)][Math.floor((entTotalX + l * xDiff / entityDist) / tileSize)][Math.floor((entTotalY + l * yDiff / entityDist) % tileSize)][Math.floor((entTotalX + l * xDiff / entityDist) % tileSize)])) {
+                    hit = 1
+                    // console.log("wall in the way")
+                    break
+                }
+            }
+
+            if (hit == 0) {
+                if (entities[k].targeting.length == 0) {
+                    // console.log("hit player")
+                    // console.log("new target @ ",[[mazePosY], [mazePosX], [tilePosY], [tilePosX]])
+                    entities[k].targeting = [mazePosY, mazePosX, tilePosY, tilePosX]
+                } else {
+                    // console.log("saving this for later hehe")
+                    entities[k].seen = [mazePosY, mazePosX, tilePosY, tilePosX]
+                }
+            }
+
+
+            if (entTotalX > plaTotalX) {
+                if (entTotalY > plaTotalY) {
+                    entityAngle = deg(Math.atan((entTotalY - plaTotalY) / (entTotalX - plaTotalX)))
+                } else {
+                    entityAngle = 360 - deg(Math.atan(-(entTotalY - plaTotalY) / (entTotalX - plaTotalX)))
+                }
+            } else {
+                if (entTotalY < plaTotalY) {
+                    entityAngle = 180 + deg(Math.atan((entTotalY - plaTotalY) / (entTotalX - plaTotalX)))
+                } else {
+                    entityAngle = 180 - deg(Math.atan(-(entTotalY - plaTotalY) / (entTotalX - plaTotalX)))
+                }
+            }
+
+            if (angleFrom(angle, entityAngle) > 0) {
+                extraAngle = - deg(Math.atan(2 / entityDist))
+            } else {
+                extraAngle = + deg(Math.atan(2 / entityDist))
+            }
+
+            // if (entityDist > viewRadius * tileSize) {
+            //     console.log(entities)
+            //     entities.splice(k, 1)
+            //     console.log("removed")
+
+            if ((-(viewAngle/2) < angleFrom(angle, entityAngle) + extraAngle) || (angleFrom(angle, entityAngle) + extraAngle < viewAngle/2)) {
+                // console.log("entity is in view!!", entityDist, -(angleFrom(angle, entityAngle)))
+                if (entityDist < 20) {
+                    entityClose = "watch out..."
+                }
+                entitiesHit.push([entityAngle, entities[k], entityDist])
             }
         }
+
         if (hit == 0) {
-            if (entities[k].targeting.length == 0) {
-                console.log("no hit")
-                console.log("new target @ ",[[mazePosY], [mazePosX], [tilePosY], [tilePosX]])
-                entities[k].targeting = [mazePosY, mazePosX, tilePosY, tilePosX]
-            } else {
-                entities[k].seen = [mazePosY, mazePosX, tilePosY, tilePosX]
-            }
-        }
-
-        if (entTotalX > plaTotalX) {
-            if (entTotalY > plaTotalY) {
-                entityAngle = deg(Math.atan((entTotalY - plaTotalY) / (entTotalX - plaTotalX)))
-            } else {
-                entityAngle = 360 - deg(Math.atan(-(entTotalY - plaTotalY) / (entTotalX - plaTotalX)))
-            }
-        } else {
-            if (entTotalY < plaTotalY) {
-                entityAngle = 180 + deg(Math.atan((entTotalY - plaTotalY) / (entTotalX - plaTotalX)))
-            } else {
-                entityAngle = 180 - deg(Math.atan(-(entTotalY - plaTotalY) / (entTotalX - plaTotalX)))
-            }
-        }
-
-        if (angleFrom(angle, entityAngle) > 0) {
-            extraAngle = - deg(Math.atan(2 / entityDist))
-        } else {
-            extraAngle = + deg(Math.atan(2 / entityDist))
-        }
-
-        // if (entityDist > viewRadius * tileSize) {
-        //     console.log(entities)
-        //     entities.splice(k, 1)
-        //     console.log("removed")
-
-        if ((entityDist < renderDist) && ((-(viewAngle/2) < angleFrom(angle, entityAngle) + extraAngle) || (angleFrom(angle, entityAngle) + extraAngle < viewAngle/2))) {
-            console.log("entitiy is in view!!")
-            
-            entitiesHit.push([entityAngle, entities[k], entityDist])
-
-            // if (entities[k].targeting.length == 0) {
-            
-
-            //     xDiff = plaTotalX - entTotalX
-            //     yDiff = plaTotalY - entTotalY
-
-            //     for (let l = 0; l < entityDist; l++) {
-            //         // console.log(entities[k].eMazePosX, entities[k].eTilePosX, Math.floor((entTotalX + l * xDiff / entityDist) / tileSize), Math.floor((entTotalX + l * xDiff / entityDist) % tileSize))
-            //         if (opaqueTiles.includes(exploredTiles[Math.floor((entTotalY + l * yDiff / entityDist) / tileSize)][Math.floor((entTotalX + l * xDiff / entityDist) / tileSize)][Math.floor((entTotalY + l * yDiff / entityDist) % tileSize)][Math.floor((entTotalX + l * xDiff / entityDist) % tileSize)])) {
-            //             hit = 1
-            //             console.log("hit")
-            //             break
-            //         }
-            //     }
-            //     if (hit == 0) {
-            //         console.log("no hit")
-            //         console.log("new target @ ",[[mazePosY], [mazePosX], [tilePosY], [tilePosX]])
-            //         entities[k].targeting = [mazePosY, mazePosX, tilePosY, tilePosX]
-            // }
-            // }
-
+            entityClose = "RUN."
         }
     }
     entitiesHit.sort(sortFunction)
@@ -855,6 +906,13 @@ function checkKeys() {
         sprint -= 3 * deltaTime
     } else {
         sprinting = 0
+    }
+
+    if ((keys["t"]) && (sens < 2)) {
+        sens += 0.15 * deltaTime
+    }
+    if ((keys["y"]) && (sens > 0.1)) {
+        sens -= 0.15 * deltaTime
     }
     
     if ((angle > 360) || (angle < 0)) {
@@ -1011,7 +1069,7 @@ function changeWindow() {
         rayWidth = size / spread
     }
     
-    if (startFlag) {
+    if (startFlag || paused) {
         canvas.fillStyle = "#FFFFFF"
         canvas.fillRect(0, 0, canvas.canvas.width, startY)
         canvas.fillRect(0, size + startY, canvas.canvas.width, canvas.canvas.height - (size + startY))
@@ -1021,13 +1079,7 @@ function changeWindow() {
         canvas.strokeRect(startX, startY, size, size)
         canvas.strokeRect(0, 0, canvas.canvas.width, canvas.canvas.height)
 
-        canvas.beginPath()
-        canvas.font = String(size / 10) + "px Arial"
-        canvas.fillStyle = "#000000"
-        canvas.textAlign = "center"
-        canvas.fillText("Click here to start", width / 2, height / 2)
-        canvas.textAlign = "start"
-        canvas.closePath()
+        canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
     }
 
     if ((win) && (winTrans >= 1)) {
@@ -1037,20 +1089,31 @@ function changeWindow() {
         canvas.fillStyle = "#000000"
         canvas.font = String(size/12) + "px Arial"
         canvas.textAlign = "center"
-        canvas.fillText("congrats, you escaped!", startX + size / 2, startY + size * 0.3)
-        canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.7)
-        canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.5)
+        canvas.fillText("congrats, you escaped!", startX + size / 2, startY + size * 0.2)
+        canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
+        canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.4)
+        canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
         actualWin = true
         document.exitPointerLock()
     }
 
     if (dead) {
-        canvas.font = String(size/12) + "px Arial"
-        canvas.textAlign = "center"
-        canvas.fillText("you died", startX + size / 2, startY + size * 0.3)
-        canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.7)
-        canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.5)
-        document.exitPointerLock()
+        if (jumpscare > 1) {
+            canvas.font = String(size/12) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("you died", startX + size / 2, startY + size * 0.2)
+            canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
+            canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.4)
+            canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
+            document.exitPointerLock()
+        } else {
+            jumpscare += deltaTime
+            canvas.drawImage(alexmJump, startX, startY, size, size)
+        }
+    }
+
+    if (paused) {
+        canvas.drawImage(pauseImg, startX, startY, size, size)
     }
 }
 
@@ -1072,15 +1135,15 @@ function mainloop() {
 
         checkKeys()
 
+        if (!win) {
+
         updateEntities()
+
+        }
 
         rayCast()
 
         createMaze()
-
-    } else if ((!startFlag) && (!actualWin) && (!dead)) {
-
-        menu()
 
     }
     
@@ -1088,7 +1151,7 @@ function mainloop() {
 
 }
 
-window.addEventListener('keydown', function (e) {
+window.addEventListener('keydown', function (e) { //activates whenever a key is pressed
     if (!(e.repeat)) {
         if (String(e.key).toLowerCase() == " ") {
             e.preventDefault()
@@ -1096,10 +1159,6 @@ window.addEventListener('keydown', function (e) {
                 jump = 1
             }
         }
-        // if (String(e.key).toLowerCase() == "f") {
-            // randEnt = rand(0, entityList.length - 1)
-            // entities.push(new Entity(mazePosX, mazePosY, tilePosX, tilePosY, entityList[randEnt], shadowList[randEnt]))
-        // }
         if (String(e.key).toLowerCase() == "r") {
             if (render < 8) {
                 render+= 2
@@ -1113,22 +1172,40 @@ window.addEventListener('keydown', function (e) {
             wallTiles.splice(wallTiles.indexOf(6), 1)
             opened = 1
         }
+        if (canChooseDifficulty) {
+            if ((String(e.key).toLowerCase() == "x")) {
+                difficulty = 0
+                tutorial = true
+                canChooseDifficulty = false
+                tutorialCount++
+            } else if ((String(e.key).toLowerCase() == "c")) {
+                difficulty = 1
+                tutorial = true
+                canChooseDifficulty = false
+                tutorialCount++
+            } else if ((String(e.key).toLowerCase() == "v")) {
+                difficulty = 2
+                tutorial = true
+                canChooseDifficulty = false
+                tutorialCount++
+            }
+        }
         keys[String(e.key).toLowerCase()] = true
     }
 }, false);
 
-window.addEventListener('keyup', function (e) {
+window.addEventListener('keyup', function (e) { //activates whenever a key is released
     keys[String(e.key).toLowerCase()] = false
 }, false);
 
 function updatePosition(e) {
-    angle -= e.movementX * 0.2
+    angle -= e.movementX * 0.2 * sens
 
-    if ((yOffAngle - e.movementY > -45) && (yOffAngle - e.movementY < 45)) {
-        yOffAngle -= e.movementY
-        yOffTop = Math.tan(rad(45 + yOffAngle))
-        yOffBottom = Math.tan(rad(-45 + yOffAngle))
-    }
+    // if ((yOffAngle - e.movementY > -45) && (yOffAngle - e.movementY < 45)) {
+    //     yOffAngle -= e.movementY
+    //     yOffTop = Math.tan(rad(45 + yOffAngle))
+    //     yOffBottom = Math.tan(rad(-45 + yOffAngle))
+    // }
 }
 
 function lockChangeAlert() {
@@ -1156,41 +1233,57 @@ const floors = 1
 const entitiesSpawn = 1
 const viewRadius = Math.ceil(renderDist/tileSize) + 1
 const renderModes = ["", "super high", "", "high", "", "medium", "", "low", "", "ultra low"]
+const difficulties = ["easy", "medium", "hard"]
+
+var imagesLoaded = 0
 
 const angus = new Image()
 angus.src = "images/angus.png"
 const angusOver = new Image()
 angusOver.src = "images/angus_overlay.png"
+const alexm = new Image()
+alexm.src = "images/alexm.png"
+const alexmOver = new Image()
+alexmOver.src = "images/alexm_overlay.png"
+const alexy = new Image()
+alexy.src = "images/alexy.png"
+const alexyOver = new Image()
+alexyOver.src = "images/alexy_overlay.png"
 
-const roblox = new Image()
-roblox.src = "images/roblox.png"
-const robloxOver = new Image()
-robloxOver.src = "images/roblox_overlay.png"
+const entityList = [angus, alexm, alexy]
+const shadowList = [angusOver, alexmOver, alexyOver]
 
-const obama = new Image()
-obama.src = "images/obama.png"
-const obamaOver = new Image()
-obamaOver.src = "images/obama_overlay.png"
-
-const entityList = [angus, roblox, obama]
-const shadowList = [angusOver, robloxOver, obamaOver]
+const alexmJump = new Image()
+alexmJump.src = "images/alexm_jumpscare.png"
 
 const L0W1 = new Image()
 L0W1.src = "images/level_0_wall.png"
-// L0W1.crossOrigin = "Anonymous"
-
 const L0W2 = new Image()
 L0W2.src = "images/level_0_column.png"
-// L0W2.crossOrigin = "Anonymous"
-
 const L0W3 = new Image()
 L0W3.src = "images/level_0_elevator_wall.png"
-
 const L0W4 = new Image()
 L0W4.src = "images/level_0_elevator_door.png"
 
 const levelTextures = [{1: L0W1, 2: L0W2, 5: L0W3, 6: L0W4}]
 const roofColours = [{0: "#f2ec90", 3: "#ffffff", 6: "#666459", 7: "#666459", 8: "#666459"}]
+
+const start0 = new Image()
+start0.src = "images/start_0.png"
+const start1 = new Image()
+start1.src = "images/start_1.png"
+const start2 = new Image()
+start2.src = "images/start_2.png"
+const start3 = new Image()
+start3.src = "images/start_3.png"
+const start4 = new Image()
+start4.src = "images/start_4.png"
+const start5 = new Image()
+start5.src = "images/start_5.png"
+const startImages = [start0, start1, start2, start3, start4, start5]
+
+const pauseImg = new Image()
+pauseImg.src = "images/paused.png"
 
 var width = window.innerWidth - 30;
 var height = window.innerHeight - 30;
@@ -1207,16 +1300,15 @@ var keys = {}
 var entities = []
 var level = 0
 var exploredTiles = initialiseMaze()
-var paused = true
+var paused = false
 var interval = 0
 var canClick = true
-var yOffAngle = 0
-var yOffTop = 0
-var yOffBottom = 0
+// var yOffAngle = 0
+// var yOffTop = 0
+// var yOffBottom = 0
 var sprint = 5 // seconds
 var sprinting = 0
 var sprintTimer = 0
-// var fps = 60
 var startFlag = true
 var deltaTime = 0
 var viewAngle = 60
@@ -1240,20 +1332,38 @@ var winTimerCumulative = 0
 var dead = false
 var jumpscare = 0
 var entitiesHit = []
+var difficulty = 1
+var start = false
+var sens = 1
+var entityClose = ""
+var tutorial = false
+var tutorialCount = 0
+var canChooseDifficulty = false
 
 c.addEventListener("click", async () => {
-    if ((canClick) && (!win)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
-        canClick = false
+    if (tutorial) {
         if (startFlag) {
             startFlag = false
             winTimer = Date.now()
         }
-        paused = false
-        keys = {}
-        if(!document.pointerLockElement) {
-        await c.requestPointerLock({
-            unadjustedMovement: true,
-        })
+        if ((canClick) && (!win)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
+            canClick = false
+            paused = false
+            keys = {}
+            if(!document.pointerLockElement) {
+            await c.requestPointerLock({
+                unadjustedMovement: true,
+            })
+            }
+        } else if (actualWin || dead) {
+            window.location.reload()
+        }
+    } else {
+        if ((tutorialCount != 4) && (tutorialCount != 5)) {
+            tutorialCount ++
+        }
+        if (tutorialCount == 4) {
+            canChooseDifficulty = true
         }
     }
 })
