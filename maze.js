@@ -1,7 +1,7 @@
 var c = document.getElementById("canvas"); //getting the canvas
 var canvas = c.getContext("2d"); //getting canvas context
 
-class Entity {
+class Entity { //entity class
     constructor(mazePosX, mazePosY, tilePosX, tilePosY, type, shadow) {
         this.eMazePosX = mazePosX
         this.eMazePosY = mazePosY
@@ -27,7 +27,7 @@ function hex(input, scale) { //converts hex colour to modified hex colour based 
     if (result3.length == 1) {
         result3 = "0" + result3
     }
-    return "#" + result1 + result2 + result3 //modified rgb
+    return "#" + result1 + result2 + result3 //modified rgb string in form "#000000"
 }
 
 function cropImageData(array, width, sx, sy, swidth, sheight) { //OBSOLETE TEST FUNCTION
@@ -37,9 +37,7 @@ function cropImageData(array, width, sx, sy, swidth, sheight) { //OBSOLETE TEST 
             result.push(array[4 * y * width + x])
         }
     }
-    // console.log(result)
     result = new ImageData(new Uint8ClampedArray(result), swidth, sheight)
-    // console.log(result.data)
     return result
 }
 
@@ -53,7 +51,7 @@ function convertArr(arr, x, y) { // OBSOLETE TEST FUNCTION
     return result
 }
 
-function sortFunction(a, b) { //sort function (only works with index 2 (shortcut lol))
+function sortFunction(a, b) { //sort function for javascript built-in (only works with index 2 (shortcut lol))
     if (a[2] === b[2]) {
         return 0;
     } else {
@@ -61,49 +59,40 @@ function sortFunction(a, b) { //sort function (only works with index 2 (shortcut
     }
 }
 
-function angleFrom(a, b) {
+function angleFrom(a, b) { //gets angle from a to b (degrees, from right, anticlockwise)
     a = getTrueAngle(a)
     b = getTrueAngle(b)
 
     if (b > a) {
-        if (b - a > 180) {
+        if (b - a > 180) { //around the 0 angle
             return - (360 - (b - a))
-        } else {
+        } else { //normal a to b
             return b - a
         }
-    } else if (b - a < -180) {
-        return 360 + (b - a)
-    } else {
-        return (b - a)
+    } else if (b - a < -180) { //b is smaller and by more than 180
+        return 360 + b - a
+    } else { //b is smaller and by less than 180
+        return b - a
     }
-    // if ((-180 < (b - a)) && ((b - a) < 180)) {
-    //     return b - a
-    // } else {
-    //     if (b > a) {
-    //         return 360 - (b - a)
-    //     } else {
-    //         return 360 + (b - a)
-    //     }
-    // }
 }
 
-function rand(min, max) { //generates a random number between min and max (inclusive?)
+function rand(min, max) { //generates a random number between min and max (inclusive)
     return Math.floor(Math.random() * (max - min + 1)) + min; //configuring the random func to be between params
 }
 
-function allowResume() {
+function allowResume() { //setTimeout calls this
     canClick = true
 }
 
-function rad(val) {
+function rad(val) { //degrees to radians
     return val * (Math.PI / 180)
 }
 
-function deg(val) {
+function deg(val) { //radians to degrees
     return val / (Math.PI / 180)
 }
 
-function getTrueAngle(angle) {
+function getTrueAngle(angle) { //converts angle to angle between 0 and 360 (not inclusive of 0 (dont ask why i decided this))
     if (angle > 0) {
         return angle % 360
     } else {
@@ -121,7 +110,7 @@ function next(value, direction) { //returns the distance to the next whole numbe
     }
 }
 
-function nextInt(value, direction) { //returns what the next int is
+function nextInt(value, direction) { //returns what the next int is in a direction
     if (Number.isInteger(value)) { //if already whole number
         return value + direction //returns next whole number if upward, previous whole number if downward
     } else if (direction == 1) {
@@ -133,31 +122,31 @@ function nextInt(value, direction) { //returns what the next int is
 
 function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
 
-    let tile = []
+    let picker = rand(0, 100) //random picker
+    let tile = [] //tile which will be returned
+    let row = [] //rows for tile
 
     for (let i = 0; i < tileSize; i++) {
-        let row = []
+        row = []
         for (let j = 0; j < tileSize; j++) {
             row.push(0)
         }
         tile.push(row)
     }
 
+    if (level == 0) { //level 0 generation
+        if (picker < 80) { //tile type 1
 
-    let picker = rand(0, 100)
-
-    if (level == 0) {
-        if (picker < 80) {
-
-            let density = tileSize * tileSize * 0.002
-            for (let i = 0; i < density; i++) {
-                let length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
+            //remember that density should be proportional to tilesize squared!!
+            let density = tileSize * tileSize * 0.002 //num of walls
+            for (let i = 0; i < density; i++) { //placing walls
+                let length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2)) //length of wall
                 let wallX = rand(0, tileSize - 1)
                 let wallY = rand(0, tileSize - length)
                 for (let j = 0; j < length; j++) {
                     tile[wallX][wallY + j] = 1
                 }
-                length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
+                length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2)) //length of wall
                 wallX = rand(0, tileSize - 1)
                 wallY = rand(0, tileSize - length)
                 for (let j = 0; j < length; j++) {
@@ -165,8 +154,8 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 }
             }
 
-            let columns = rand(0, Math.ceil(tileSize * tileSize * 0.005))
-            for (let i = 0; i < columns; i++) {
+            let columns = rand(0, Math.ceil(tileSize * tileSize * 0.005)) //num of columns
+            for (let i = 0; i < columns; i++) { //placing columns
                 wallX = rand(1, tileSize - 2)
                 wallY = rand(1, tileSize - 2)
                 while ((tile[wallX][wallY] == 1) && (tile[wallX][wallY+1] == 1) && (tile[wallX][wallY-1] == 1) && (tile[wallX+1][wallY] == 1) && (tile[wallX+1][wallY+1] == 1) && (tile[wallX+1][wallY-1] == 1) && (tile[wallX-1][wallY] == 1) && (tile[wallX-1][wallY+1] == 1) && (tile[wallX-1][wallY-1] == 1)) {
@@ -176,8 +165,8 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 tile[wallX][wallY] = 2
             }
 
-            let lights = rand(1, Math.floor(tileSize * tileSize * 0.01))
-            for (let i = 0; i < lights; i++) {
+            let lights = rand(1, Math.floor(tileSize * tileSize * 0.01)) //num of lights
+            for (let i = 0; i < lights; i++) { //lights
                 let rando = rand(0, tileSize - 2)
                 let rando2 = rand(0, tileSize - 2)
                 if (!(wallTiles.includes(tile[rando][rando2]))) {
@@ -194,7 +183,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 }
 
             }
-            if (picker < 25) {
+            if (picker < 20 - 5 * difficulty) { //elevator spawn (yes its manual, im lazy)
                 let spotX = rand(0, tileSize - 4)
                 let spotY = rand(0, tileSize - 4)
                 tile[spotY][spotX] = 5
@@ -214,7 +203,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 tile[spotY + 1][spotX + 2] = 8
                 tile[spotY + 2][spotX + 2] = 8
             }
-        } else {
+        } else { //tile type 2 (pluses)
             tile = []
             let roww = []
             for (i = 0; i < 20; i++) {
@@ -255,81 +244,22 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
             }
         }
 
-        // if ((mazeX != "no") && (rand(0, 3 - difficulty) == 0)){
-        if (mazeX != "no") {
+        if ((mazeX != "no") && (rand(0, 3 - difficulty) == 0)){ //probability of entity based on preference and difficulty
             let randEnt = rand(0, entityList.length - 1)
             let randPos = rand(0, tileSize - 1)
             let randPos2 = rand(0, tileSize - 1)
-            while (!wallTiles.includes(tile[randPos][randPos2])) {
+            while (!wallTiles.includes(tile[randPos][randPos2])) { //making sure it doesnt spawn in wall
                 randPos = rand(0, tileSize - 1)
                 randPos2 = rand(0, tileSize - 1)
             }
             // console.log("yes")
             // if (entities.length < 3) {
-                entities.push(new Entity(mazeY, mazeX, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
+            entities.push(new Entity(mazeY, mazeX, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
             // }
         }
     }
 
-    return tile
-
-    // let tile = []
-
-    // for (let i = 0; i < tileSize; i++) {
-    //     let row = []
-    //     for (let j = 0; j < tileSize; j++) {
-    //         row.push(0)
-    //     }
-    //     tile.push(row)
-    // }
-
-    // let density = tileSize * tileSize * 0.002
-    // for (let i = 0; i < density; i++) {
-    //     let length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
-    //     let wallX = rand(0, tileSize - 1)
-    //     let wallY = rand(0, tileSize - length)
-    //     for (let j = 0; j < length; j++) {
-    //         tile[wallX][wallY + j] = 1
-    //     }
-    //     length = rand(Math.floor(tileSize / 10), Math.floor(tileSize / 2))
-    //     wallX = rand(0, tileSize - 1)
-    //     wallY = rand(0, tileSize - length)
-    //     for (let j = 0; j < length; j++) {
-    //         tile[wallY + j][wallX] = 1
-    //     }
-    // }
-
-    // let columns = rand(0, Math.ceil(tileSize * tileSize * 0.005))
-    // for (let i = 0; i < columns; i++) {
-    //     wallX = rand(1, tileSize - 2)
-    //     wallY = rand(1, tileSize - 2)
-    //     while ((tile[wallX][wallY] == 1) && (tile[wallX][wallY+1] == 1) && (tile[wallX][wallY-1] == 1) && (tile[wallX+1][wallY] == 1) && (tile[wallX+1][wallY+1] == 1) && (tile[wallX+1][wallY-1] == 1) && (tile[wallX-1][wallY] == 1) && (tile[wallX-1][wallY+1] == 1) && (tile[wallX-1][wallY-1] == 1)) {
-    //         wallX = rand(1, tileSize - 2)
-    //         wallY = rand(1, tileSize - 2)
-    //     }
-    //     tile[wallX][wallY] = 2
-    // }
-
-    // let lights = rand(1, Math.floor(tileSize * tileSize * 0.01))
-    // for (let i = 0; i < lights; i++) {
-    //     let rando = rand(0, tileSize - 2)
-    //     let rando2 = rand(0, tileSize - 2)
-    //     if (!(wallTiles.includes(tile[rando][rando2]))) {
-    //         tile[rando][rando2] = 3
-    //     }
-    //     if (!(wallTiles.includes(tile[rando+1][rando2]))) {
-    //         tile[rando+1][rando2] = 3
-    //     }
-    //     if (!(wallTiles.includes(tile[rando+1][rando2+1]))) {
-    //         tile[rando+1][rando2+1] = 3
-    //     }
-    //     if (!(wallTiles.includes(tile[rando][rando2+1]))) {
-    //         tile[rando][rando2+1] = 3
-    //     }
-
-    // }
-
-    // return tile //as per [tileSize]
+    return tile //returned tile
 }
 
 function initialiseMaze() { //creates initial maze and tiles
@@ -343,20 +273,19 @@ function initialiseMaze() { //creates initial maze and tiles
         maze.push(row) //adds rows to maze
     }
     maze[mazePosY][mazePosX][Math.floor(tilePosY)][Math.floor(tilePosX)] = 0 //making sure player doesn't spawn in a block
+    
     // let randEnte = rand(0, entityList.length - 1)
     // entities.push(new Entity(mazePosX, mazePosY, 5.5, 5.5, entityList[randEnte], shadowList[randEnte]))
     // entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnte], shadowList[randEnte]))
 
     // entities.push(new Entity(mazePosX, mazePosY, 10.5, 10.5, angus, angusOver))
-
-
-
     return maze //4d list
 }
 
 function createMaze() { //generates new maze to suit tiles
     let currentLength = exploredTiles.length
     if (mazePosX - viewRadius < 0) { //if view radius goes outside to the left
+        //make sure to increment all maze pos xs by 1
         mazePosX ++
         for (let i = 0; i < entities.length; i++) {
             entities[i].eMazePosX ++
@@ -368,7 +297,7 @@ function createMaze() { //generates new maze to suit tiles
             }
         }
         for (let i = 0; i < exploredTiles.length; i++) {
-            exploredTiles[i].unshift(generateTile(i, 0)) //add an extra tile to front of row
+            exploredTiles[i].unshift(generateTile(i, 0)) //now add an extra tile to front of row
         }
     } else if (mazePosX + viewRadius > exploredTiles[0].length - 1) { //view radius goes outside to the right
         for (let i = 0; i < exploredTiles.length; i++) {
@@ -377,6 +306,7 @@ function createMaze() { //generates new maze to suit tiles
     }
 
     if (mazePosY - viewRadius < 0) { //if view radius goes outside downward
+        //make sure to increment all maze pos ys by 1
         mazePosY ++
         for (let i = 0; i < entities.length; i++) {
             entities[i].eMazePosY ++
@@ -401,7 +331,7 @@ function createMaze() { //generates new maze to suit tiles
     }
 }
 
-function rayCast() {
+function rayCast() { //does a lot lmao...
     let rays = [] //stores ray info
     let rayAngle = 0 //angle of current ray
     let hit = false //whether or not a ray has hit an opaque wall
@@ -419,50 +349,21 @@ function rayCast() {
     let mazeModY = 0 //ray mod for when it goes outside of tile y
     let currentSquareX = 0 //what square on grid is being checked
     let currentSquareY = 0 //what square on grid is being checked
-    let distInWall = 0 //distance in wall
-    let roofs = []
-    let floorDist = 0
-    winOption = 0
+    let distInWall = 0 //distance in wall (for textures)
+    let roofs = [] //list of roofs (3d i think)
+    let floorDist = 0 //dist to a certain floor
+    winOption = 0 //make sure to reset the win option
 
-    if (debug == 1) {
-        canvas.beginPath()
-        for (let y = 0; y < tileSize; y++) {
-            for (let x = 0; x < tileSize; x++) {
-                if (opaqueTiles.includes(exploredTiles[mazePosY][mazePosX][y][x])) {
-                    canvas.fillStyle = "#FF0000";
-                } else {
-                    canvas.fillStyle = "#00FF00";
-                }
-                canvas.fillRect(startX + x * size/tileSize, startY + size - (y+1) * size/tileSize, size/tileSize, size/tileSize)
-                canvas.strokeRect(startX + x * size/tileSize, startY + size - (y+1) * size/tileSize, size/tileSize, size/tileSize)
-            }
-        }
-        canvas.fillStyle = "#234742";
-
-        canvas.fillRect(startX + tilePosX * size/tileSize - 5, startY + size - (tilePosY) * size/tileSize - 5, 10, 10)
-        for (i = 0; i < entities.length; i++) {
-            if ((entities[i].eMazePosX == mazePosX) && (entities[i].eMazePosY == mazePosY)) {
-                canvas.strokeRect(startX + entities[i].eTilePosX * size/tileSize - 5, startY + size - (entities[i].eTilePosY) * size/tileSize - 5, 10, 10)
-            }
-        }
-
-        canvas.arc(startX + tilePosX * size/tileSize, startY + size - (tilePosY) * size/tileSize, size / 10, rad(-angle - 30), rad(-angle + 30))
-
-        canvas.stroke()
-
-        canvas.closePath()
-    }
-
-    for (let i = 0; i < spread; i++) {
-        posX = tilePosX
-        posY = tilePosY
-        hit = false
+    for (let i = 0; i < spread; i++) { //for each ray according to spread
+        posX = tilePosX //start from tile pos x
+        posY = tilePosY //start from tile pos y
+        hit = false //it hasnt hit anything yet silly
         mazeModX = 0
         mazeModY = 0
         rendDist = 0
         dist = 0
         perpDist = 0
-        rayAngle = getTrueAngle(angle - (viewAngle / 2) + i * viewAngle / (spread - 1))
+        rayAngle = getTrueAngle(angle - (viewAngle / 2) + i * viewAngle / (spread - 1)) //ray angle from i and viewAngle
         currentSquareX = 0
         currentSquareY = 0
         wallType = 0
@@ -481,7 +382,7 @@ function rayCast() {
             directionX = 1
         }
         
-        while ((hit == false) && (rendDist < renderDist + 1)) {
+        while ((hit == false) && (rendDist < renderDist + 1)) { //while the ray hasnt hit anything or gone too far
             if (Math.abs(next(posX, directionX) / Math.cos(rad(rayAngle))) < Math.abs(next(posY, directionY) / Math.sin(rad(rayAngle)))) {
                 //this is for if horizontal diagonally closer
                 posY = posY + (next(posX, directionX) * Math.tan(rad(rayAngle)))
@@ -504,11 +405,11 @@ function rayCast() {
                 modY = 0
             }
             
-            if (posX == tileSize) {
+            if (posX == tileSize) { //if the ray is outside the tile (right)
                 mazeModX++
                 posX = 0
                 currentSquareX = 0
-            } else if (posX + modX < 0) {
+            } else if (posX + modX < 0) { //if the ray is outside the tile (left)
                 mazeModX--
                 posX = tileSize + posX
                 currentSquareX = tileSize - 1
@@ -516,11 +417,11 @@ function rayCast() {
                 currentSquareX = Math.floor(posX + modX)
             }
 
-            if (posY == tileSize) {
+            if (posY == tileSize) { //if the ray is outside the tile (top)
                 mazeModY++
                 posY = 0
                 currentSquareY = 0
-            } else if (posY + modY < 0) {
+            } else if (posY + modY < 0) { //if the ray is outside the tile (bottom)
                 mazeModY--
                 posY = tileSize + posY
                 currentSquareY = tileSize - 1
@@ -528,20 +429,22 @@ function rayCast() {
                 currentSquareY = Math.floor(posY + modY)
             }
 
-            if (hit == false) {
-                if (opaqueTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX])) {
-                    hit = true
-                }
-                if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6) && (rendDist < 5) && (opened == 0)) {
-                    winOption = 1
-                }
+            if (opaqueTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX])) {
+                //if the ray hits something opaque
+                hit = true
+            }
+            if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6) && (rendDist < 5) && (!opened)) {
+                //if the ray hits the closed elevator doors and you're close
+                winOption = 1
             }
 
             floorDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
-            
+
             if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (roofs[i].length < Math.floor(renderDist / 2))) {
+                //normal ray hit
                 roofs[i].push([floorDist, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
             } else if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) && (roofs[i].length < Math.floor(renderDist / 2))) {
+                //ray hit out of camera
                 roofs[i][0] = [1 - 2 * jumpP, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
             // } else if (roofs[i].length == Math.floor(renderDist / 2)) {
             //     roofs[i].push([floorDist, 0])
@@ -549,15 +452,14 @@ function rayCast() {
             rendDist++
         }
 
-
         wallType = exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]
 
-        if (rendDist >= renderDist + 1) {
+        if (rendDist >= renderDist + 1) { //just sets walltype to normal at certain dist
             wallType = 1
         }
 
         dist = Math.sqrt(Math.pow(- tilePosY + posY + tileSize * mazeModY, 2) + Math.pow( - tilePosX + posX + tileSize * mazeModX, 2)) / 4
-        perpDist = dist * Math.cos(rad(Math.abs(angle - rayAngle)))
+        perpDist = dist * Math.cos(rad(Math.abs(angle - rayAngle))) //remove some fisheye!
 
         wallHeight = size / perpDist //the derivation of height based on distance. assumed viewing angle
 
@@ -572,12 +474,13 @@ function rayCast() {
         rays.push([i, wallHeight, perpDist, wallType, dist * 4, distInWall])
     }
 
-    rays.sort(sortFunction)
-    rays.reverse()
+    rays.sort(sortFunction) //cheeky shortcut with perdist as index 2 lol
+    rays.reverse() //optimise: angle goes right to left but data is taken left to right
 
     canvas.beginPath()
+    
     canvas.fillStyle = "#000000"
-    canvas.fillRect(startX, startY, size, size/2)
+    canvas.fillRect(startX, startY, size, size/2) //black top background
 
     let gradient = canvas.createLinearGradient(startX + size / 2, startY + size / 2, startX + size / 2, startY + size)
     gradient.addColorStop(0, "#000000")
@@ -588,8 +491,9 @@ function rayCast() {
     canvas.closePath()
 
     canvas.lineWidth = rayWidth
-    for (let m = 0; m < roofs.length; m++) {
-        for (let n = 0; n < roofs[m].length - 1; n++) {
+
+    for (let m = 0; m < roofs.length; m++) { //for each slice
+        for (let n = 0; n < roofs[m].length - 1; n++) { //for each segment
             canvas.fillStyle = "#000000"
 
             if (!(roofs[m][n][1] == 3)) {
@@ -600,67 +504,44 @@ function rayCast() {
 
             canvas.beginPath()
 
-            // canvas.fillRect(startX + (roofs.length - m-1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth, Math.floor((size - (size / (roofs[m][n+1][0] - roofs[m][n+1][0]))) / 2))
             canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
             
             canvas.closePath()
-            // canvas.beginPath()
-            // canvas.moveTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])))
-            // canvas.lineTo(startX + (roofs.length - m - 0.5) * rayWidth, startY + Math.ceil((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])))
-            // canvas.stroke()
-            // canvas.closePath()
-            // canvas.strokeStyle = "#FFFFFF"
-            // canvas.beginPath()
-            // canvas.strokeStyle = "#000000"
-            // canvas.lineTo(startX + (roofs.length - m - 1) * size/roofs.length, startY + roofs[m][n+1][0] + 1)
-            // canvas.stroke()
-            // canvas.closePath()
         }
     }
 
     let l = 0
-    // var idata = canvas.createImageData(125, 500);
-    // idata.data.set(L0W1Arr);
-    // canvas.putImageData(idata, 0, 0);    
-    for (let k = 0; k < entitiesHit.length + 1; k++) {
+  
+    for (let k = 0; k < entitiesHit.length + 1; k++) { //for each entity that is hit
         while ((l < rays.length) && ((k == entitiesHit.length) || (rays[l][4] > entitiesHit[k][2]))) {
+            //draw rays from back until each entity
             canvas.beginPath()
 
             if (Math.ceil(rays[l][5] * 125 + rayWidth * 500 / rays[l][1]) <= 125) {
-
-                // canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(rays[l][5] * 125), 0, Math.ceil(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
                 canvas.drawImage(levelTextures[level][rays[l][3]], Math.floor(rays[l][5] * 125), 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
-
             } else {
-                // canvas.putImageData(cropImageData(levelTextures2[level][rays[l][3]].data, 125, Math.floor(125 - rayWidth * 500 / rays[l][1]), 0, Math.floor(rayWidth * 500 / rays[l][1]), 500), startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]))
                 canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
             }
 
             canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 1 / (rays[l][2] + 1)) + ")"
             canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 2)
-            
-            // canvas.moveTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2));
-            // canvas.lineTo(startX + (spread-rays[l][0]-0.5) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + rays[l][1]);
-            // canvas.stroke()
     
             canvas.closePath()
 
             l++
         }
 
-        if (k != entitiesHit.length) {
+        if (k != entitiesHit.length) { //unless k is last
             canvas.strokeStyle = "#000000"
 
             canvas.beginPath()
-            // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
-            // canvas.stroke()
+
             canvas.drawImage(entitiesHit[k][1].type, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
             canvas.globalAlpha = 1 - 3 / (entitiesHit[k][2] + 3)
             canvas.drawImage(entitiesHit[k][1].shadow, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
             canvas.globalAlpha = 1
             
             canvas.closePath()
-
         } 
     }
 
@@ -670,14 +551,9 @@ function rayCast() {
     canvas.fillStyle = "#FFFFFF"
     canvas.fillRect(startX + 0.11 * size, startY + 0.91 * size, 0.18 * size * (sprint/5), 0.03 * size)
 
-    canvas.font = String(size/40) + "px Arial"
-    if (!win) {
-        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Graphics: " + String(renderModes[render]) + " | Mouse sensitivity: " + String(Math.floor(sens * 100) / 100), startX + 0.05 * size, startY + 0.08 * size)
-    }
-
     canvas.font = String(size/15) + "px Arial"
     canvas.textAlign = "center"
-    if ((winOption == 1) && (opened == 0)) {
+    if ((winOption == 1) && (!opened)) {
         canvas.fillText("Press 'E' to open door", startX + 0.5 * size, startY + 0.5 * size)
     }
 
@@ -691,6 +567,13 @@ function rayCast() {
         canvas.fillRect(startX, startY, size, size)
     }
 
+    canvas.font = String(size/40) + "px Arial"
+    canvas.textAlign = "left"
+    canvas.fillStyle = "#000000"
+    
+    if (!win) {
+        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Graphics: " + String(renderModes[render]) + " | Mouse sensitivity: " + String(Math.floor(sens * 100) / 100) + " | Difficulty: " + String(difficulties[difficulty]), startX + 0.05 * size, startY + 0.08 * size)
+    }
 
     canvas.fillStyle = "#FFFFFF"
     canvas.fillRect(0, 0, width, startY)
@@ -704,7 +587,7 @@ function rayCast() {
     canvas.strokeRect(0, 0, width, height)
 }
 
-function updateEntities() {
+function updateEntities() { //moves entities and moderates behaviour from array of classes
     // console.log("ALL ENTITY START \n \n \n \n \n")
     let entityDist = 0
     let entityAngle = 0
@@ -859,7 +742,7 @@ function updateEntities() {
     entitiesHit.reverse()
 }
 
-function updatePhysics() {
+function updatePhysics() { //moderates background things
     if ((sprintTimer < 2) && (sprint < 5) && !(keys["shift"])) {
         sprintTimer += deltaTime
     }
@@ -868,40 +751,40 @@ function updatePhysics() {
         sprint += deltaTime
     }
 
-    if (jump == 1) {
+    if (jump) {
 
         jumpP = 1.4 * timeSinceJump - 1.75 * timeSinceJump * timeSinceJump
 
         if (jumpP < 0) {
             jumpP = 0
-            jump = 0
+            jump = false
             timeSinceJump = 0
         } else {
             timeSinceJump += deltaTime
         }
     }
 
-    if (!(sprinting) && (speed > 1) && (jump == 0)) {
+    if (!(sprinting) && (speed > 1) && (!jump)) {
         speed -= 2 * deltaTime
-    } else if (!(sprinting) && (speed > 1) && (jump == 1)) {
+    } else if (!(sprinting) && (speed > 1) && (jump)) {
         speed -= 0.2 * deltaTime
     }
 
 }
 
-function checkKeys() {
+function checkKeys() { //moderates keys that can be held
 
-    if ((jump == 0) && (keys["shift"]) && (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1))) {
-        sprinting = 1
+    if ((!jump) && (keys["shift"]) && (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1))) {
+        sprinting = true
         sprintTimer = 0
         if (speed < 1.5) {
             speed += 4 * deltaTime
         }
         sprint -= deltaTime
-    } else if ((jump == 1) && (keys["shift"]) && (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1))) {
+    } else if ((jump) && (keys["shift"]) && (((sprint > 0) && (sprintTimer <= 0)) || (sprint > 1))) {
         sprint -= 3 * deltaTime
     } else {
-        sprinting = 0
+        sprinting = false
     }
 
     if ((keys["t"]) && (sens < 2)) {
@@ -1030,7 +913,7 @@ function checkKeys() {
     }
 }
 
-function changeWindow() {
+function changeWindow() { //changes window size and puts menus? CHANGE
     if ((window.innerHeight != height) || (window.innerWidth != width)) {
         width = window.innerWidth - 20;
         height = window.innerHeight - 20;
@@ -1039,16 +922,6 @@ function changeWindow() {
 
         canvas.canvas.width = width;
         canvas.canvas.height = height;
-
-        // if (width > height) {
-        //     startX = (width - Math.floor(height / spread) * spread) / 2
-        //     startY = 0
-        //     size = Math.floor(height / spread) * spread
-        // } else {
-        //     startX = 0
-        //     startY = (height - Math.floor(width / spread) * spread) / 2
-        //     size = Math.floor(width / spread) * spread
-        // }
         
         if (width > height) {
             startY = 0
@@ -1061,7 +934,6 @@ function changeWindow() {
         }
 
         spread = size / render
-
         rayWidth = size / spread
     }
     
@@ -1114,9 +986,9 @@ function changeWindow() {
     }
 }
 
-function mainloop() {
+function mainloop() { //controls all function
 
-    if (!(isNaN((Date.now() - deltaTimer) / 1000))) {
+    if (!(isNaN((Date.now() - deltaTimer) / 1000))) { //this would actually be a win
 
         deltaTime = (Date.now() - deltaTimer) / 1000
 
@@ -1134,7 +1006,7 @@ function mainloop() {
 
         if (!win) {
 
-        updateEntities()
+            updateEntities()
 
         }
 
@@ -1148,64 +1020,11 @@ function mainloop() {
 
 }
 
-window.addEventListener('keydown', function (e) { //activates whenever a key is pressed
-    if (!(e.repeat)) {
-        if (String(e.key).toLowerCase() == " ") {
-            e.preventDefault()
-            if (jump == 0) {
-                jump = 1
-            }
-        }
-        if (String(e.key).toLowerCase() == "r") {
-            if (render < 8) {
-                render+= 2
-            } else {
-                render = 1
-            }
-        }
-        if ((String(e.key).toLowerCase() == "e") && (winOption == 1)) {
-            winOption = 0
-            opaqueTiles.splice(opaqueTiles.indexOf(6), 1)
-            wallTiles.splice(wallTiles.indexOf(6), 1)
-            opened = 1
-        }
-        if (canChooseDifficulty) {
-            if ((String(e.key).toLowerCase() == "x")) {
-                difficulty = 0
-                tutorial = true
-                canChooseDifficulty = false
-                tutorialCount++
-            } else if ((String(e.key).toLowerCase() == "c")) {
-                difficulty = 1
-                tutorial = true
-                canChooseDifficulty = false
-                tutorialCount++
-            } else if ((String(e.key).toLowerCase() == "v")) {
-                difficulty = 2
-                tutorial = true
-                canChooseDifficulty = false
-                tutorialCount++
-            }
-        }
-        keys[String(e.key).toLowerCase()] = true
-    }
-}, false);
-
-window.addEventListener('keyup', function (e) { //activates whenever a key is released
-    keys[String(e.key).toLowerCase()] = false
-}, false);
-
-function updatePosition(e) {
+function updatePosition(e) { //update position based on mouse movement and sens
     angle -= e.movementX * 0.2 * sens
-
-    // if ((yOffAngle - e.movementY > -45) && (yOffAngle - e.movementY < 45)) {
-    //     yOffAngle -= e.movementY
-    //     yOffTop = Math.tan(rad(45 + yOffAngle))
-    //     yOffBottom = Math.tan(rad(-45 + yOffAngle))
-    // }
 }
 
-function lockChangeAlert() {
+function lockChangeAlert() { //when user enters or exists pointer lock
     if (document.pointerLockElement === c) { //going from a pause menu to the game
         document.addEventListener("mousemove", updatePosition, false);
         paused = false
@@ -1219,20 +1038,17 @@ function lockChangeAlert() {
         }
     }
 }
+
 //store
-const tileSize = 100
-const renderDist = 100
-var opaqueTiles = [1, 2, 4, 5, 6]
-var wallTiles = [1, 2, 4, 5, 6]
-const debug = 0
-const threeDee = 1
-const floors = 1
-const viewRadius = Math.ceil(renderDist/tileSize) + 1
-const renderModes = ["", "super high", "", "high", "", "medium", "", "low", "", "ultra low"]
-const difficulties = ["easy", "medium", "hard"]
+const tileSize = 100 //size of each tile
+const renderDist = 100 //distance, in blocks, that player can see (technically not straight distance)
+var opaqueTiles = [1, 2, 4, 5, 6] //tiles which you can't see through
+var wallTiles = [1, 2, 4, 5, 6] //tiles which you can't walk through
+const viewRadius = Math.ceil(renderDist/tileSize) + 1 //how many tiles which can be generated away
+const renderModes = ["", "super high", "", "high", "", "medium", "", "low", "", "ultra low"] //shortcut list for render modes
+const difficulties = ["easy", "medium", "hard"] //list for difficulties
 
-var imagesLoaded = 0
-
+//ENTITIES
 const angus = new Image()
 angus.src = "images/angus.png"
 const angusOver = new Image()
@@ -1246,12 +1062,14 @@ alexy.src = "images/alexy.png"
 const alexyOver = new Image()
 alexyOver.src = "images/alexy_overlay.png"
 
-const entityList = [angus, alexm, alexy]
-const shadowList = [angusOver, alexmOver, alexyOver]
+const entityList = [angus, alexm, alexy] //list of images
+const shadowList = [angusOver, alexmOver, alexyOver] //list of opaque overlays
 
+//JUMPSCARES
 const alexmJump = new Image()
 alexmJump.src = "images/alexm_jumpscare.png"
 
+//WALL TEXTURES
 const L0W1 = new Image()
 L0W1.src = "images/level_0_wall.png"
 const L0W2 = new Image()
@@ -1264,6 +1082,7 @@ L0W4.src = "images/level_0_elevator_door.png"
 const levelTextures = [{1: L0W1, 2: L0W2, 5: L0W3, 6: L0W4}]
 const roofColours = [{0: "#f2ec90", 3: "#ffffff", 6: "#666459", 7: "#666459", 8: "#666459"}]
 
+//SLIDES
 const start0 = new Image()
 start0.src = "images/start_0.png"
 const start1 = new Image()
@@ -1285,60 +1104,54 @@ deathImg.src = "images/deathScreen.png"
 const winImg = new Image()
 winImg.src = "images/winScreen.png"
 
-var width = window.innerWidth - 30;
-var height = window.innerHeight - 30;
-var rayWidth = 0
-var size = 0
-var startX = 0
-var startY = 0
-var tilePosX = 0.5
-var tilePosY = 0.5
-var mazePosX = viewRadius
-var mazePosY = viewRadius
-var angle = 0
-var keys = {}
-var entities = []
-var level = 0
-var exploredTiles = initialiseMaze()
-var paused = false
-var interval = 0
-var canClick = true
-// var yOffAngle = 0
-// var yOffTop = 0
-// var yOffBottom = 0
-var sprint = 5 // seconds
-var sprinting = 0
-var sprintTimer = 0
-var startFlag = true
-var deltaTime = 0
-var viewAngle = 60
-var jump = 0
-var jumpV = 0
-var jumpP = 0
-var jumpPress = 0
-var timeSinceJump = 0
-var speed = 1
-var annoying = 0
-var deltaTimer = 0
-var render = 5
-var spread = 250
-var winOption = 0
-var opened = 0
-var win = false
-var winTrans = 0
-// var actualWin = false
-var winTimer = 0
-var winTimerCumulative = 0
-var dead = false
-var jumpscare = 0
-var entitiesHit = []
-var difficulty = 1
-var start = false
-var sens = 1
-var entityClose = ""
-var tutorial = false
-var tutorialCount = 0
-var canChooseDifficulty = false
+//vars
+var width = window.innerWidth - 30; //width of canvas
+var height = window.innerHeight - 30; //height of canvas
+var rayWidth = 0 //width in pixels of each ray, should be int
+var size = 0 //size of game screen
+var startX = 0 //pixel dist between canvas edge and game screen X
+var startY = 0 //pixel dist between canvas edge and game screen Y
+var tilePosX = 0.5 //position on the tile X
+var tilePosY = 0.5 //position on the tile Y
+var mazePosX = viewRadius //position of tile on maze X
+var mazePosY = viewRadius //position of tile on maze Y
+var angle = 0 //angle of player from right anticlockwise
+var keys = {} //keys pressed
+var entities = [] //list of entities as objects
+var level = 0 //current level (obsolete for now)
+var exploredTiles = initialiseMaze() //maze 4d array
+var paused = false //paused
+var canClick = true //can user enter pointer lock
+var sprint = 5 // seconds of sprint
+var sprinting = false //is sprinting
+var sprintTimer = 0 //timer for sprint to start going back up
+var startFlag = true //can user click to start game
+var deltaTime = 0 //time per frame in seconds
+var viewAngle = 60 //angle that user can see (60 is good)
+var jump = false //is jumping
+var jumpP = 0 //jump height
+var timeSinceJump = 0 //time since jump using deltatime
+var speed = 1 //speed of player modifier
+var deltaTimer = 0 //helps with deltatime
+var render = 5 //pixels per slice
+var spread = 250 //number of rays based on pixels per slice
+var winOption = 0 //able to open elevator doors
+var opened = false //elevator doors open?
+var win = false //user has won
+var winTrans = 0 //transparency of win fade
+var winTimer = 0 //timer of game
+var winTimerCumulative = 0 //timer of game helper
+var dead = false //us dead
+var jumpscare = 0 //jumpscare timer
+var entitiesHit = [] //entities which are in view
+var difficulty = 1 //difficulty
+var sens = 1 //sentitivity multiplier
+var entityClose = "" //entity text
+var tutorial = false //has tutorial been completed
+var tutorialCount = 0 //page of tutorial
+var canChooseDifficulty = false //whether user can choose difficulty screen
+
+document.addEventListener("pointerlockchange", lockChangeAlert, false);
 
 c.addEventListener("click", async () => {
     if (tutorial) {
@@ -1368,6 +1181,54 @@ c.addEventListener("click", async () => {
     }
 })
 
-document.addEventListener("pointerlockchange", lockChangeAlert, false);
+window.addEventListener('keydown', function (e) { //activates whenever a key is pressed
+    if (!(e.repeat)) { //moderates keys that aren't held
+        if (String(e.key).toLowerCase() == " ") {
+            e.preventDefault()
+            if (!jump) {
+                jump = true
+            }
+        }
+        
+        if (String(e.key).toLowerCase() == "r") {
+            if (render < 8) {
+                render+= 2
+            } else {
+                render = 1
+            }
+        }
+
+        if ((String(e.key).toLowerCase() == "e") && (winOption == 1)) {
+            winOption = 0
+            opaqueTiles.splice(opaqueTiles.indexOf(6), 1)
+            wallTiles.splice(wallTiles.indexOf(6), 1)
+            opened = true
+        }
+
+        if (canChooseDifficulty) {
+            if ((String(e.key).toLowerCase() == "x")) {
+                difficulty = 0
+                tutorial = true
+                canChooseDifficulty = false
+                tutorialCount++
+            } else if ((String(e.key).toLowerCase() == "c")) {
+                difficulty = 1
+                tutorial = true
+                canChooseDifficulty = false
+                tutorialCount++
+            } else if ((String(e.key).toLowerCase() == "v")) {
+                difficulty = 2
+                tutorial = true
+                canChooseDifficulty = false
+                tutorialCount++
+            }
+        }
+        keys[String(e.key).toLowerCase()] = true
+    }
+}, false);
+
+window.addEventListener('keyup', function (e) { //activates whenever a key is released
+    keys[String(e.key).toLowerCase()] = false
+}, false);
 
 mainloop()
