@@ -265,9 +265,9 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 randPos2 = rand(0, tileSize - 1)
             }
             // console.log("yes")
-            // if (entities.length < 3) {
+            if (entities.length < 3) {
                 entities.push(new Entity(mazeY, mazeX, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
-            // }
+            }
         }
     }
 
@@ -357,9 +357,6 @@ function initialiseMaze() { //creates initial maze and tiles
 function createMaze() { //generates new maze to suit tiles
     let currentLength = exploredTiles.length
     if (mazePosX - viewRadius < 0) { //if view radius goes outside to the left
-            for (let i = 0; i < exploredTiles.length; i++) {
-                exploredTiles[i].unshift(generateTile(i, 0)) //add an extra tile to front of row
-            }
         mazePosX ++
         for (let i = 0; i < entities.length; i++) {
             entities[i].eMazePosX ++
@@ -370,6 +367,9 @@ function createMaze() { //generates new maze to suit tiles
                 entities[i].seen[1] = entities[i].seen[1] + 1
             }
         }
+        for (let i = 0; i < exploredTiles.length; i++) {
+            exploredTiles[i].unshift(generateTile(i, 0)) //add an extra tile to front of row
+        }
     } else if (mazePosX + viewRadius > exploredTiles[0].length - 1) { //view radius goes outside to the right
         for (let i = 0; i < exploredTiles.length; i++) {
             exploredTiles[i].push(generateTile(i, currentLength)) //add an extra tile to front of row
@@ -377,11 +377,6 @@ function createMaze() { //generates new maze to suit tiles
     }
 
     if (mazePosY - viewRadius < 0) { //if view radius goes outside downward
-        let row = []
-        for (let i = 0; i < exploredTiles[0].length; i++) {
-            row.push(generateTile(0, i))
-        }
-        exploredTiles.unshift(row) //add empty row to front of list
         mazePosY ++
         for (let i = 0; i < entities.length; i++) {
             entities[i].eMazePosY ++
@@ -392,6 +387,11 @@ function createMaze() { //generates new maze to suit tiles
                 entities[i].seen[0] = entities[i].seen[0] + 1
             }
         }
+        let row = []
+        for (let i = 0; i < exploredTiles[0].length; i++) {
+            row.push(generateTile(0, i))
+        }
+        exploredTiles.unshift(row) //add empty row to front of list
     } else if (mazePosY + viewRadius > exploredTiles.length - 1) { //if view radius goes oustide upward
         let row = []
         for (let i = 0; i < exploredTiles[0].length; i++) {
@@ -710,7 +710,7 @@ function rayCast() {
 }
 
 function updateEntities() {
-    // console.log("ALL ENTITY START \n \n \n \n \n")
+    console.log("ALL ENTITY START \n \n \n \n \n")
     let entityDist = 0
     let entityAngle = 0
     let entTotalX = 0
@@ -724,6 +724,7 @@ function updateEntities() {
     let target = []
     let hit = 0
     let extraAngle = 0
+    entityClose = ""
 
     entitiesHit = [] //entities seen
     for (k = 0; k < entities.length; k++) {
