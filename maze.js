@@ -265,9 +265,9 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 randPos2 = rand(0, tileSize - 1)
             }
             // console.log("yes")
-            if (entities.length < 3) {
+            // if (entities.length < 3) {
                 entities.push(new Entity(mazeY, mazeX, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
-            }
+            // }
         }
     }
 
@@ -343,8 +343,8 @@ function initialiseMaze() { //creates initial maze and tiles
         maze.push(row) //adds rows to maze
     }
     maze[mazePosY][mazePosX][Math.floor(tilePosY)][Math.floor(tilePosX)] = 0 //making sure player doesn't spawn in a block
-    let randEnte = rand(0, entityList.length - 1)
-    entities.push(new Entity(mazePosX, mazePosY, tileSize - 0.5, tileSize - 0.5, entityList[randEnte], shadowList[randEnte]))
+    // let randEnte = rand(0, entityList.length - 1)
+    // entities.push(new Entity(mazePosX, mazePosY, 5.5, 5.5, entityList[randEnte], shadowList[randEnte]))
     // entities.push(new Entity(mazePosX, mazePosY, rand(0, tileSize - 1) - 0.5, rand(0, tileSize - 1) - 0.5, entityList[randEnte], shadowList[randEnte]))
 
     // entities.push(new Entity(mazePosX, mazePosY, 10.5, 10.5, angus, angusOver))
@@ -651,19 +651,16 @@ function rayCast() {
         if (k != entitiesHit.length) {
             canvas.strokeStyle = "#000000"
 
-            if (entitiesSpawn == 1) {
-                canvas.beginPath()
-                // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
-                // canvas.stroke()
-                canvas.drawImage(entitiesHit[k][1].type, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
-                console.log(entitiesHit[k][2], 1 - 3 / (entitiesHit[k][2] + 3))
-                canvas.globalAlpha = 1 - 3 / (entitiesHit[k][2] + 3)
-                canvas.drawImage(entitiesHit[k][1].shadow, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
-                canvas.globalAlpha = 1
-                
-                canvas.closePath()
+            canvas.beginPath()
+            // canvas.arc(startX + size - (angleFrom(angle, entityAngle) + viewAngle/2) * (size / viewAngle), startY + size / 2, size / entitiesHit[k][2] / 4, 0, Math.PI * 2)
+            // canvas.stroke()
+            canvas.drawImage(entitiesHit[k][1].type, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+            canvas.globalAlpha = 1 - 3 / (entitiesHit[k][2] + 3)
+            canvas.drawImage(entitiesHit[k][1].shadow, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
+            canvas.globalAlpha = 1
+            
+            canvas.closePath()
 
-            }
         } 
     }
 
@@ -685,13 +682,11 @@ function rayCast() {
     }
 
     canvas.fillStyle = "rgba(255, 255, 255, 0.5)"
-    console.log(entityClose)
     if (rand(0, Math.floor(1/(4 * deltaTime))) != 0) {
         canvas.fillText(entityClose, startX + 0.5 * size, startY + 0.5 * size)
     }
 
     if (win) {
-        winTrans += 0.2 * deltaTime
         canvas.fillStyle = "rgba(255, 255, 255, " + String(winTrans) + ")"
         canvas.fillRect(startX, startY, size, size)
     }
@@ -710,7 +705,7 @@ function rayCast() {
 }
 
 function updateEntities() {
-    console.log("ALL ENTITY START \n \n \n \n \n")
+    // console.log("ALL ENTITY START \n \n \n \n \n")
     let entityDist = 0
     let entityAngle = 0
     let entTotalX = 0
@@ -752,7 +747,7 @@ function updateEntities() {
         plaTotalY = tileSize * mazePosY + tilePosY
 
         entityDist = Math.pow(Math.pow(entTotalX - plaTotalX, 2) + Math.pow(entTotalY - plaTotalY, 2), 0.5)
-        console.log("i'm ", entityDist, " away from the player")
+        // console.log("i'm ", entityDist, " away from the player")
 
         if (entityDist < 2) {
             dead = true
@@ -1083,29 +1078,30 @@ function changeWindow() {
         canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
     }
 
-    if ((win) && (winTrans >= 1)) {
-        winTrans = 1
-        canvas.fillStyle = "#FFFFFF"
-        canvas.fillRect(startX, startY, size, size)
-        canvas.fillStyle = "#000000"
-        canvas.font = String(size/12) + "px Arial"
-        canvas.textAlign = "center"
-        canvas.fillText("congrats, you escaped!", startX + size / 2, startY + size * 0.2)
-        canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
-        canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.4)
-        canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
-        actualWin = true
-        document.exitPointerLock()
+    if (win) {
+        if (winTrans > 1) {
+            canvas.font = String(size/12) + "px Arial"
+            canvas.textAlign = "left"
+            canvas.drawImage(winImg, startX, startY, size, size)
+            // canvas.fillText("congrats, you escaped!", startX + size / 2, startY + size * 0.2)
+            // canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
+            canvas.fillText(String(winTimerCumulative / 1000), startX + size * 0.1, startY + size * 0.55)
+            // canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
+            document.exitPointerLock()
+        } else {
+            winTrans += 0.2 * deltaTime
+        }
     }
 
     if (dead) {
         if (jumpscare > 1) {
             canvas.font = String(size/12) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("you died", startX + size / 2, startY + size * 0.2)
-            canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
-            canvas.fillText("your time: " + String(winTimerCumulative / 1000) + " seconds!", startX + size / 2, startY + size * 0.4)
-            canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
+            canvas.textAlign = "left"
+            canvas.drawImage(deathImg, startX, startY, size, size)
+            // canvas.fillText("you died", startX + size / 2, startY + size * 0.2)
+            // canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
+            canvas.fillText(String(winTimerCumulative / 1000), startX + 0.1 * size, startY + size * 0.55)
+            // canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
             document.exitPointerLock()
         } else {
             jumpscare += deltaTime
@@ -1130,7 +1126,7 @@ function mainloop() {
 
     changeWindow()
 
-    if ((!paused) && (!startFlag) && (!actualWin) && (!dead)) {
+    if ((!paused) && (!startFlag) && (!(winTrans > 1)) && (!dead)) {
 
         updatePhysics()
 
@@ -1231,7 +1227,6 @@ var wallTiles = [1, 2, 4, 5, 6]
 const debug = 0
 const threeDee = 1
 const floors = 1
-const entitiesSpawn = 1
 const viewRadius = Math.ceil(renderDist/tileSize) + 1
 const renderModes = ["", "super high", "", "high", "", "medium", "", "low", "", "ultra low"]
 const difficulties = ["easy", "medium", "hard"]
@@ -1285,6 +1280,10 @@ const startImages = [start0, start1, start2, start3, start4, start5]
 
 const pauseImg = new Image()
 pauseImg.src = "images/paused.png"
+const deathImg = new Image()
+deathImg.src = "images/deathScreen.png"
+const winImg = new Image()
+winImg.src = "images/winScreen.png"
 
 var width = window.innerWidth - 30;
 var height = window.innerHeight - 30;
@@ -1327,7 +1326,7 @@ var winOption = 0
 var opened = 0
 var win = false
 var winTrans = 0
-var actualWin = false
+// var actualWin = false
 var winTimer = 0
 var winTimerCumulative = 0
 var dead = false
@@ -1356,7 +1355,7 @@ c.addEventListener("click", async () => {
                 unadjustedMovement: true,
             })
             }
-        } else if (actualWin || dead) {
+        } else if ((winTrans > 1) || (jumpscare > 1)) {
             window.location.reload()
         }
     } else {
