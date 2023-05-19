@@ -647,6 +647,7 @@ function updateEntities() { //moves entities and moderates behaviour from array 
         if (entityDist < 2) {
             dead = true
             winTimerCumulative += Date.now() - winTimer
+            entityKilled = entities[k].type
         }
         
         if (entities[k].targeting.length != 0) {
@@ -1000,7 +1001,13 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             document.exitPointerLock()
         } else {
             jumpscare += deltaTime
-            canvas.drawImage(alexmJump, startX, startY, size, size)
+            if (rand(0, Math.ceil(0.1 / deltaTime)) == 0) {
+                canvas.fillStyle = "#4d0b0b"
+            } else {
+                canvas.fillStyle = "#000000"
+            }
+            canvas.fillRect(startX, startY, size, size)
+            canvas.drawImage(smiler, startX + rand(0, Math.ceil(tileSize / 100)), startY + rand(0, Math.ceil(tileSize / 100)), 0.9 * size, 0.9 * size)
         }
     }
 
@@ -1085,12 +1092,24 @@ alexy.src = "images/alexy.png"
 const alexyOver = new Image()
 alexyOver.src = "images/alexy_overlay.png"
 
-const entityList = [angus, alexm, alexy] //list of images
-const shadowList = [angusOver, alexmOver, alexyOver] //list of opaque overlays
+const smiler = new Image()
+smiler.src = "images/smiler.png"
+const smilerOver = new Image()
+smilerOver.src = "images/smiler_overlay.png"
+const bacteria = new Image()
+bacteria.src = "images/bacteria.png"
+const bacteriaOver = new Image()
+bacteriaOver.src = "images/bacteria_overlay.png"
+const creep = new Image()
+creep.src = "images/creep.png"
+const creepOver = new Image()
+creepOver.src = "images/creep_overlay.png"
 
-//JUMPSCARES
-const alexmJump = new Image()
-alexmJump.src = "images/alexm_jumpscare.png"
+// const entityList = [angus, alexm, alexy] //list of images
+// const shadowList = [angusOver, alexmOver, alexyOver] //list of opaque overlays
+
+const entityList = [creep, bacteria, smiler]
+const shadowList = [creepOver, bacteriaOver, smilerOver]
 
 //WALL TEXTURES
 const L0W1 = new Image()
@@ -1126,6 +1145,8 @@ const deathImg = new Image()
 deathImg.src = "images/deathScreen.png"
 const winImg = new Image()
 winImg.src = "images/winScreen.png"
+
+
 
 //vars
 var width = window.innerWidth - 30; //width of canvas
@@ -1166,6 +1187,7 @@ var winTimer = 0 //timer of game
 var winTimerCumulative = 0 //timer of game helper
 var dead = false //us dead
 var jumpscare = 0 //jumpscare timer
+var entityKilled = 0 //entity which killed player
 var entitiesHit = [] //entities which are in view
 var difficulty = 1 //difficulty
 var sens = 1 //sentitivity multiplier
