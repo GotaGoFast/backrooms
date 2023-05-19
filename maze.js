@@ -183,7 +183,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 }
 
             }
-            if (picker < 20 - 5 * difficulty) { //elevator spawn (yes its manual, im lazy)
+            if ((picker < 20 - 5 * difficulty) && (mazeX != "no")) { //elevator spawn (yes its manual, im lazy)
                 let spotX = rand(0, tileSize - 4)
                 let spotY = rand(0, tileSize - 4)
                 tile[spotY][spotX] = 5
@@ -244,6 +244,8 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
             }
         }
 
+        console.log("test")
+
         if ((mazeX != "no") && (rand(0, 3 - difficulty) == 0)){ //probability of entity based on preference and difficulty
             let randEnt = rand(0, entityList.length - 1)
             let randPos = rand(0, tileSize - 1)
@@ -252,7 +254,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 randPos = rand(0, tileSize - 1)
                 randPos2 = rand(0, tileSize - 1)
             }
-            // console.log("yes")
+            console.log("yes")
             // if (entities.length < 3) {
             entities.push(new Entity(mazeY, mazeX, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
             // }
@@ -670,9 +672,12 @@ function updateEntities() { //moves entities and moderates behaviour from array 
             entities[k].targeting = entities[k].seen
             entities[k].seen = []
         }
+
+        if (entityDist < renderDist / 2) {
+            entityClose = "be careful..."
+        }
         
         if (entityDist < renderDist) {
-            entityClose = "be careful..."
             hit = 0
         
             xDiff = plaTotalX - entTotalX
@@ -727,11 +732,14 @@ function updateEntities() { //moves entities and moderates behaviour from array 
 
             if ((-(viewAngle/2) < angleFrom(angle, entityAngle) + extraAngle) || (angleFrom(angle, entityAngle) + extraAngle < viewAngle/2)) {
                 // console.log("entity is in view!!", entityDist, -(angleFrom(angle, entityAngle)))
-                if (entityDist < 20) {
+                if (entityDist < renderDist / 2) {
                     entityClose = "watch out..."
                 }
                 entitiesHit.push([entityAngle, entities[k], entityDist])
             }
+        }
+        if (entities[k].targeting.length != 0) {
+            entityClose = "HES COMING"
         }
 
         if (hit == 0) {
