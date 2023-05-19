@@ -244,19 +244,17 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
             }
         }
 
-        console.log("test")
-
-        if ((mazeX != "no") && (rand(0, 3 - difficulty) == 0)){ //probability of entity based on preference and difficulty
+        if ((mazeX != "no") && (rand(1, 3 - difficulty) == 1)){ //probability of entity based on preference and difficulty
             let randEnt = rand(0, entityList.length - 1)
             let randPos = rand(0, tileSize - 1)
             let randPos2 = rand(0, tileSize - 1)
-            while (!wallTiles.includes(tile[randPos][randPos2])) { //making sure it doesnt spawn in wall
-                randPos = rand(0, tileSize - 1)
-                randPos2 = rand(0, tileSize - 1)
-            }
+            // while (!(wallTiles.includes(tile[randPos][randPos2]))) { //making sure it doesnt spawn in wall
+            //     randPos = rand(0, tileSize - 1)
+            //     randPos2 = rand(0, tileSize - 1)
+            // }
             console.log("yes")
             // if (entities.length < 3) {
-            entities.push(new Entity(mazeY, mazeX, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
+            entities.push(new Entity(mazeX, mazeY, 0.5, 0.5, entityList[randEnt], shadowList[randEnt]))
             // }
         }
     }
@@ -285,12 +283,12 @@ function initialiseMaze() { //creates initial maze and tiles
 }
 
 function createMaze() { //generates new maze to suit tiles
-    let currentLength = exploredTiles.length
+    let currentLength = exploredTiles[0].length
     if (mazePosX - viewRadius < 0) { //if view radius goes outside to the left
         //make sure to increment all maze pos xs by 1
         mazePosX ++
         for (let i = 0; i < entities.length; i++) {
-            entities[i].eMazePosX ++
+            entities[i].eMazePosX = entities[i].eMazePosX + 1
             if (entities[i].targeting.length != 0) {
                 entities[i].targeting[1] = entities[i].targeting[1] + 1
             }
@@ -301,17 +299,20 @@ function createMaze() { //generates new maze to suit tiles
         for (let i = 0; i < exploredTiles.length; i++) {
             exploredTiles[i].unshift(generateTile(i, 0)) //now add an extra tile to front of row
         }
+
     } else if (mazePosX + viewRadius > exploredTiles[0].length - 1) { //view radius goes outside to the right
         for (let i = 0; i < exploredTiles.length; i++) {
             exploredTiles[i].push(generateTile(i, currentLength)) //add an extra tile to front of row
         }
     }
 
+    currentLength = exploredTiles.length
+
     if (mazePosY - viewRadius < 0) { //if view radius goes outside downward
         //make sure to increment all maze pos ys by 1
         mazePosY ++
         for (let i = 0; i < entities.length; i++) {
-            entities[i].eMazePosY ++
+            entities[i].eMazePosY = entities[i].eMazePosY + 1
             if (entities[i].targeting.length != 0) {
                 entities[i].targeting[0] = entities[i].targeting[0] + 1
             }
@@ -324,6 +325,7 @@ function createMaze() { //generates new maze to suit tiles
             row.push(generateTile(0, i))
         }
         exploredTiles.unshift(row) //add empty row to front of list
+
     } else if (mazePosY + viewRadius > exploredTiles.length - 1) { //if view radius goes oustide upward
         let row = []
         for (let i = 0; i < exploredTiles[0].length; i++) {
@@ -574,7 +576,7 @@ function rayCast() { //does a lot lmao...
     canvas.fillStyle = "#000000"
     
     if (!win) {
-        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Graphics: " + String(renderModes[render]) + " | Mouse sensitivity: " + String(Math.floor(sens * 100) / 100) + " | Difficulty: " + String(difficulties[difficulty]), startX + 0.05 * size, startY + 0.08 * size)
+        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Graphics: " + String(renderModes[render]) + " | Mouse sensitivity: " + String(Math.floor(sens * 100) / 100) + " | Difficulty: " + String(difficulties[difficulty]) + " | Position: " + String(mazePosY) + ", " + String(mazePosX), startX + 0.05 * size, startY + 0.08 * size)
     }
 
     canvas.fillStyle = "#FFFFFF"
@@ -606,7 +608,10 @@ function updateEntities() { //moves entities and moderates behaviour from array 
     let extraAngle = 0
     entityClose = ""
 
+    // console.log("player", mazePosX, mazePosY)
+
     entitiesHit = [] //entities seen
+
     for (k = 0; k < entities.length; k++) {
         entityDist = 0
         entityAngle = 0
@@ -622,6 +627,11 @@ function updateEntities() { //moves entities and moderates behaviour from array 
         hit = 1
         extraAngle = 0
 
+        // if ((entities[k].eMazePosX == mazePosX) && (entities[k].eMazePosY == mazePosY)) {
+        //     entityClose = "entitiy on tile"
+        // }
+
+        console.log(entities[k].eMazePosY, entities[k].eMazePosX, mazePosY, mazePosX)
 
         // console.log("entity start!!!!!!")
         // console.log("I'm at", entities[k].eMazePosY, entities[k].eMazePosX, entities[k].eTilePosY, entities[k].eTilePosX)
@@ -730,11 +740,9 @@ function updateEntities() { //moves entities and moderates behaviour from array 
             //     entities.splice(k, 1)
             //     console.log("removed")
 
-            if ((-(viewAngle/2) < angleFrom(angle, entityAngle) + extraAngle) || (angleFrom(angle, entityAngle) + extraAngle < viewAngle/2)) {
+            if ((-(viewAngle/2) < angleFrom(angle, entityAngle) + extraAngle) && (angleFrom(angle, entityAngle) + extraAngle < viewAngle/2)) {
                 // console.log("entity is in view!!", entityDist, -(angleFrom(angle, entityAngle)))
-                if (entityDist < renderDist / 2) {
-                    entityClose = "watch out..."
-                }
+                entityClose = "watch out..."
                 entitiesHit.push([entityAngle, entities[k], entityDist])
             }
         }
@@ -1134,7 +1142,7 @@ var angle = 0 //angle of player from right anticlockwise
 var keys = {} //keys pressed
 var entities = [] //list of entities as objects
 var level = 0 //current level (obsolete for now)
-var exploredTiles = initialiseMaze() //maze 4d array
+var exploredTiles = [] //maze 4d array
 var paused = false //paused
 var canClick = true //can user enter pointer lock
 var sprint = 5 // seconds of sprint
@@ -1226,16 +1234,19 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
                 tutorial = true
                 canChooseDifficulty = false
                 tutorialCount++
+                exploredTiles = initialiseMaze()
             } else if ((String(e.key).toLowerCase() == "c")) {
                 difficulty = 1
                 tutorial = true
                 canChooseDifficulty = false
                 tutorialCount++
+                exploredTiles = initialiseMaze()
             } else if ((String(e.key).toLowerCase() == "v")) {
                 difficulty = 2
                 tutorial = true
                 canChooseDifficulty = false
                 tutorialCount++
+                exploredTiles = initialiseMaze()
             }
         }
         keys[String(e.key).toLowerCase()] = true
