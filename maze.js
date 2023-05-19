@@ -946,6 +946,13 @@ function changeWindow() { //changes window size and puts menus? CHANGE
     }
     
     if (startFlag || paused) {
+
+        if (tutorialCount == 0) {
+            canvas.font = String(size/6) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("LOADING...", startX + size / 2, startY + size / 2)
+        }
+
         canvas.fillStyle = "#FFFFFF"
         canvas.fillRect(0, 0, canvas.canvas.width, startY)
         canvas.fillRect(0, size + startY, canvas.canvas.width, canvas.canvas.height - (size + startY))
