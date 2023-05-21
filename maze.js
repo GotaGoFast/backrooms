@@ -556,7 +556,7 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
             }
         }
         if (entities[k].targeting.length != 0) {
-            entityClose = "HES COMING"
+            entityClose = "IT'S COMING"
         }
 
         if (hit == 0) {
