@@ -1346,11 +1346,11 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
             }
         }
 
-        if ((String(e.key).toLowerCase() == "o") && (tutorialCount == 9)) {
-            window.open("http://google.com")
-        }
         if ((String(e.key).toLowerCase() == "p") && (tutorialCount == 9)) {
-            window.open("http://google.com.au")
+            window.open("https://docs.google.com/document/d/1pMc_EMAaEXr7hqRP8DBKRCGqPtd_estMuHSFS0-Qa_k/edit?usp=sharing")
+        }
+        if ((String(e.key).toLowerCase() == "o") && (tutorialCount == 9)) {
+            window.open("https://docs.google.com/document/d/1Wt2AdKdIfuwpbc7C2yA4vDrZmIs2LJPcsr0EcVpdMzU/edit?usp=sharing")
         }
 
         keys[String(e.key).toLowerCase()] = true
