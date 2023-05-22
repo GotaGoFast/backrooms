@@ -451,15 +451,15 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
         entityDist = Math.pow(Math.pow(entTotalX - plaTotalX, 2) + Math.pow(entTotalY - plaTotalY, 2), 0.5)
         // console.log("i'm ", entityDist, " away from the player")
 
-        // if (entityDist < 2) {
-        //     dead = true
-        //     winTimerCumulative += Date.now() - winTimer
-        //     entityKilled = entities[k].type
-        // }
-
-        if (entityDist < renderDist / 2) {
-            entityClose = "be careful..."
+        if (entityDist < 2) {
+            dead = true
+            winTimerCumulative += Date.now() - winTimer
+            entityKilled = entities[k].type
         }
+
+        // if (entityDist < renderDist / 2) {
+        //     entityClose = "be careful..."
+        // }
         
         if (entityDist < renderDist) {
             if ((entityClose != "watch out...") && (entityClose != "RUN.") && (entityClose != "IT'S COMING")) {
