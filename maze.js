@@ -85,6 +85,7 @@ function lockChangeAlert() { //when user enters or exists pointer lock
     } else { //going from the game to a pause menu
         document.removeEventListener("mousemove", updatePosition, false);
         if ((!win) && (!dead)) { //only allows pause if gamer hasnt won yet and isnt dead
+            L0S1.pause()
             winTimerCumulative += Date.now() - winTimer
             paused = true
             setTimeout(allowResume, 1500)
@@ -242,7 +243,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 }
 
             }
-            if ((picker < 20 - 5 * difficulty) && (mazeX != "no")) { //elevator spawn (yes its manual, im lazy)
+            // if ((picker < 20 - 5 * difficulty) && (mazeX != "no")) { //elevator spawn (yes its manual, im lazy)
                 let spotX = rand(0, tileSize - 4)
                 let spotY = rand(0, tileSize - 4)
                 tile[spotY][spotX] = 5
@@ -261,7 +262,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 tile[spotY + 2][spotX + 1] = 7
                 tile[spotY + 1][spotX + 2] = 8
                 tile[spotY + 2][spotX + 2] = 8
-            }
+            // }
         } else { //tile type 2 (pluses)
             tile = []
             let roww = []
@@ -455,6 +456,10 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
             dead = true
             winTimerCumulative += Date.now() - winTimer
             entityKilled = entities[k].type
+            L0S1.pause()
+            L0Jump.currentTime = 3
+            L0Jump.play()
+
         }
 
         // if (entityDist < renderDist / 2) {
@@ -482,7 +487,7 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
 
             if (hit == 0) {
                 entities[k].targeting = [mazePosY, mazePosX, tilePosY, tilePosX]
-                console.log("I CAN SEE YOU")
+                // console.log("I CAN SEE YOU")
                 // if (entities[k].targeting.length == 0) {
                 //     // console.log("hit player")
                 //     // console.log("new target @ ",[[mazePosY], [mazePosX], [tilePosY], [tilePosX]])
@@ -1008,6 +1013,14 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
     canvas.fillRect(startX + size, startY, width - size - startX, size)
 }
 
+// //sound processing
+// function manageSounds() {
+//     if (L0S1.ended) {
+//         L0S1.load()
+//         L0S1.play()
+//     }
+// }
+
 //other
 class Entity { //entity class
     constructor(mazePosX, mazePosY, tilePosX, tilePosY, type, shadow) {
@@ -1069,6 +1082,14 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             document.exitPointerLock()
         } else {
             winTrans += 0.2 * deltaTime
+            if (L0S1.volume > 0.2 * deltaTime) {
+                L0S1.volume -= 0.2 * deltaTime
+            }
+            if (winTrans > 1) {
+                L0S1.pause()
+                L0S3.loop = true
+                L0S3.play()
+            }
         }
     }
 
@@ -1091,6 +1112,11 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             }
             canvas.fillRect(startX, startY, size, size)
             canvas.drawImage(smiler, startX + rand(0, Math.ceil(tileSize / 100)), startY + rand(0, Math.ceil(tileSize / 100)), 0.9 * size, 0.9 * size)
+            if (jumpscare > 1) {
+                L0Jump.pause()
+                L0S2.loop = true
+                L0S2.play()
+            }
         }
     }
 
@@ -1227,6 +1253,17 @@ deathImg.src = "images/deathScreen.png"
 const winImg = new Image()
 winImg.src = "images/winScreen.png"
 
+//SOUNDS
+const L0S1 = new Audio()
+L0S1.src = "sounds/level_0_ambience.mp3"
+const L0S2 = new Audio()
+L0S2.src = "sounds/level_0_death.mp3"
+const L0S3 = new Audio()
+L0S3.src = "sounds/level_0_win.mp3"
+
+const L0Jump = new Audio()
+L0Jump.src = "sounds/level_0_jumpscare.mp3"
+
 //VARS
 var width = window.innerWidth - 30; //width of canvas
 var height = window.innerHeight - 30; //height of canvas
@@ -1288,6 +1325,8 @@ c.addEventListener("click", async () => {
             canClick = false
             paused = false
             keys = {}
+            L0S1.loop = true
+            L0S1.play()
             if(!document.pointerLockElement) {
             await c.requestPointerLock({
                 unadjustedMovement: true,
@@ -1303,7 +1342,6 @@ c.addEventListener("click", async () => {
         if (tutorialCount == 8) {
             canChooseDifficulty = true
         }
-        console.log(tutorialCount)
     }
 })
 
