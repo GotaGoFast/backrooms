@@ -305,16 +305,16 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
 
         // console.log(rand(1, 7 - 2 * difficulty) == 1)
 
-        if ((mazeX != "no") && (rand(1, 7 - 2 * difficulty) == 1)){ //probability of entity based on preference and difficulty
+        if ((mazeX != "no") && (rand(1, 5 - 2 * difficulty) == 1)){ //probability of entity based on preference and difficulty
             let randEnt = rand(0, entityList.length - 1)
             let randPos = rand(0, tileSize - 1)
             let randPos2 = rand(0, tileSize - 1)
-            while (!(wallTiles.includes(tile[randPos][randPos2]))) { //making sure it doesnt spawn in wall
+            while (wallTiles.includes(tile[randPos][randPos2])) { //making sure it doesnt spawn in wall
                 randPos = rand(0, tileSize - 1)
                 randPos2 = rand(0, tileSize - 1)
             }
             // if (entities.length < 3) {
-            entities.push(new Entity(mazeX, mazeY, randPos, randPos2, entityList[randEnt], shadowList[randEnt]))
+            entities.push(new Entity(mazeX, mazeY, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
             // }
         }
     }
@@ -451,52 +451,20 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
         entityDist = Math.pow(Math.pow(entTotalX - plaTotalX, 2) + Math.pow(entTotalY - plaTotalY, 2), 0.5)
         // console.log("i'm ", entityDist, " away from the player")
 
-        if (entityDist < 2) {
-            dead = true
-            winTimerCumulative += Date.now() - winTimer
-            entityKilled = entities[k].type
-        }
-        
-        if (entities[k].targeting.length != 0) {
-            target = entities[k].targeting
-            // console.log("there is currently a target:", target)
-            targetTotalX = tileSize * target[1] + target[3]
-            targetTotalY = tileSize * target[0] + target[2]
-
-            if ((Math.abs(targetTotalX - entTotalX) < 1) && (Math.abs(targetTotalY - entTotalY) < 1)) {
-                // console.log("im at the target")
-                entities[k].targeting = []
-            } else {
-                entities[k].eTilePosX += Math.sign(targetTotalX - entTotalX) * deltaTime * (7 + 3 * difficulty)
-                entities[k].eTilePosY += Math.sign(targetTotalY - entTotalY) * deltaTime * (7 + 3 * difficulty)
-                if (entities[k].eTilePosX < 0) {
-                    entities[k].eMazePosX --
-                    entities[k].eTilePosX += tileSize
-                } else if (entities[k].eTilePosX >= tileSize) {
-                    entities[k].eMazePosX ++
-                    entities[k].eTilePosX -= tileSize
-                }
-                if (entities[k].eTilePosY < 0) {
-                    entities[k].eMazePosY --
-                    entities[k].eTilePosY += tileSize
-                } else if (entities[k].eTilePosY >= tileSize) {
-                    entities[k].eMazePosY++
-                    entities[k].eTilePosY -= tileSize
-                }
-                // console.log("end position", entities[k].eMazePosX, entities[k].eMazePosY, entities[k].eTilePosX, entities[k].eTilePosY)
-            }
-        } else if (entities[k].seen.length != 0) {
-            // console.log("i dont have a target, but im assigning one now from 'seen':", entities[k].seen)
-            entities[k].targeting = entities[k].seen
-            entities[k].seen = []
-        }
-
-        // if (entityDist < renderDist / 2) {
-        //     entityClose = "be careful..."
+        // if (entityDist < 2) {
+        //     dead = true
+        //     winTimerCumulative += Date.now() - winTimer
+        //     entityKilled = entities[k].type
         // }
+
+        if (entityDist < renderDist / 2) {
+            entityClose = "be careful..."
+        }
         
         if (entityDist < renderDist) {
-            entityClose = "be careful..."
+            if ((entityClose != "watch out...") && (entityClose != "RUN.") && (entityClose != "IT'S COMING")) {
+                entityClose = "be careful..."
+            }
             hit = 0
         
             xDiff = plaTotalX - entTotalX
@@ -513,14 +481,16 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
             }
 
             if (hit == 0) {
-                if (entities[k].targeting.length == 0) {
-                    // console.log("hit player")
-                    // console.log("new target @ ",[[mazePosY], [mazePosX], [tilePosY], [tilePosX]])
-                    entities[k].targeting = [mazePosY, mazePosX, tilePosY, tilePosX]
-                } else {
+                entities[k].targeting = [mazePosY, mazePosX, tilePosY, tilePosX]
+                console.log("I CAN SEE YOU")
+                // if (entities[k].targeting.length == 0) {
+                //     // console.log("hit player")
+                //     // console.log("new target @ ",[[mazePosY], [mazePosX], [tilePosY], [tilePosX]])
+                //     entities[k].targeting = [mazePosY, mazePosX, tilePosY, tilePosX]
+                // } else {
                     // console.log("saving this for later hehe")
-                    entities[k].seen = [mazePosY, mazePosX, tilePosY, tilePosX]
-                }
+                //     entities[k].seen = [mazePosY, mazePosX, tilePosY, tilePosX]
+                // }
             }
 
 
@@ -544,6 +514,40 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
                 extraAngle = + deg(Math.atan(2 / entityDist))
             }
 
+            if (entities[k].targeting.length != 0) {
+                target = entities[k].targeting
+                // console.log("there is currently a target:", target)
+                targetTotalX = tileSize * target[1] + target[3]
+                targetTotalY = tileSize * target[0] + target[2]
+    
+                if ((Math.abs(targetTotalX - entTotalX) < 1) && (Math.abs(targetTotalY - entTotalY) < 1)) {
+                    // console.log("im at the target")
+                    entities[k].targeting = []
+                } else {
+                    entities[k].eTilePosX += Math.abs(Math.cos(rad(entityAngle))) * Math.sign(targetTotalX - entTotalX) * deltaTime * (7 + 3 * difficulty)
+                    entities[k].eTilePosY += Math.abs(Math.sin(rad(entityAngle))) * Math.sign(targetTotalY - entTotalY) * deltaTime * (7 + 3 * difficulty)
+                    if (entities[k].eTilePosX < 0) {
+                        entities[k].eMazePosX --
+                        entities[k].eTilePosX += tileSize
+                    } else if (entities[k].eTilePosX >= tileSize) {
+                        entities[k].eMazePosX ++
+                        entities[k].eTilePosX -= tileSize
+                    }
+                    if (entities[k].eTilePosY < 0) {
+                        entities[k].eMazePosY --
+                        entities[k].eTilePosY += tileSize
+                    } else if (entities[k].eTilePosY >= tileSize) {
+                        entities[k].eMazePosY++
+                        entities[k].eTilePosY -= tileSize
+                    }
+                    // console.log("end position", entities[k].eMazePosX, entities[k].eMazePosY, entities[k].eTilePosX, entities[k].eTilePosY)
+                }
+            // } else if (entities[k].seen.length != 0) {
+            //     // console.log("i dont have a target, but im assigning one now from 'seen':", entities[k].seen)
+            //     entities[k].targeting = entities[k].seen
+            //     entities[k].seen = []
+            }
+
             // if (entityDist > viewRadius * tileSize) {
             //     console.log(entities)
             //     entities.splice(k, 1)
@@ -551,12 +555,16 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
 
             if ((-(viewAngle/2) < angleFrom(angle, entityAngle) + extraAngle) && (angleFrom(angle, entityAngle) + extraAngle < viewAngle/2)) {
                 // console.log("entity is in view!!", entityDist, -(angleFrom(angle, entityAngle)))
-                entityClose = "watch out..."
+                if ((entityClose != "RUN.") && (entityClose != "IT'S COMING")) {
+                    entityClose = "watch out..."
+                }
                 entitiesHit.push([entityAngle, entities[k], entityDist])
             }
         }
         if (entities[k].targeting.length != 0) {
-            entityClose = "IT'S COMING"
+            if (entityClose != "RUN.") {
+                entityClose = "IT'S COMING"
+            }
         }
 
         if (hit == 0) {
@@ -1346,11 +1354,15 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
             }
         }
 
-        if ((String(e.key).toLowerCase() == "p") && (tutorialCount == 9)) {
-            window.open("https://docs.google.com/document/d/1pMc_EMAaEXr7hqRP8DBKRCGqPtd_estMuHSFS0-Qa_k/edit?usp=sharing")
-        }
-        if ((String(e.key).toLowerCase() == "o") && (tutorialCount == 9)) {
-            window.open("https://docs.google.com/document/d/1Wt2AdKdIfuwpbc7C2yA4vDrZmIs2LJPcsr0EcVpdMzU/edit?usp=sharing")
+        if (!startFlag) {
+
+            if ((String(e.key).toLowerCase() == "p") && (tutorialCount == 9)) {
+                window.open("https://docs.google.com/document/d/1pMc_EMAaEXr7hqRP8DBKRCGqPtd_estMuHSFS0-Qa_k/edit?usp=sharing")
+            }
+            if ((String(e.key).toLowerCase() == "o") && (tutorialCount == 9)) {
+                window.open("https://docs.google.com/document/d/1Wt2AdKdIfuwpbc7C2yA4vDrZmIs2LJPcsr0EcVpdMzU/edit?usp=sharing")
+            }
+
         }
 
         keys[String(e.key).toLowerCase()] = true
