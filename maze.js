@@ -6,7 +6,6 @@ function updatePosition(e) { //update position based on mouse movement and sens
 function lockChangeAlert() { //when user enters or exists pointer lock
     if (document.pointerLockElement === c) { //going from a pause menu to the game
         document.addEventListener("mousemove", updatePosition, false);
-        paused = false
         winTimer = Date.now()
     } else { //going from the game to a pause menu
         document.removeEventListener("mousemove", updatePosition, false);
@@ -406,7 +405,7 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
             yDiff = plaTotalY - entTotalY
 
 
-            for (let l = 0; l < entityDist; l++) {
+            for (let l = 1; l < entityDist; l++) {
                 // console.log(Math.floor((entTotalY + l * yDiff / entityDist) / tileSize), Math.floor((entTotalX + l * xDiff / entityDist) / tileSize), Math.floor((entTotalY + l * yDiff / entityDist) % tileSize), Math.floor((entTotalX + l * xDiff / entityDist) % tileSize))
                 if (opaqueTiles.includes(exploredTiles[Math.floor((entTotalY + l * yDiff / entityDist) / tileSize)][Math.floor((entTotalX + l * xDiff / entityDist) / tileSize)][Math.floor((entTotalY + l * yDiff / entityDist) % tileSize)][Math.floor((entTotalX + l * xDiff / entityDist) % tileSize)])) {
                     hit = 1
@@ -531,7 +530,6 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
     if ((entityClose != 0) && (!chasing)) {
         chasing = true
         chase[level].play()
-        console.log("hi")
     } else if ((entityClose == "") && (chasing)) {
         chasing = false
         chase[level].pause()
@@ -973,7 +971,9 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
     canvas.fillRect(startX + 0.86 * size, startY + 0.06 * size, 0.0075 * size, 0.03 * size)
     canvas.fillRect(startX + 0.875 * size, startY + 0.06 * size, 0.0075 * size, 0.03 * size)
     canvas.font = String(size/40) + "px Arial"
-    canvas.fillText("esc", startX + 0.89 * size, startY + 0.085 * size)
+    if (win != 1) {
+        canvas.fillText("esc", startX + 0.89 * size, startY + 0.085 * size)
+    }
 
     canvas.fillStyle = "#FFFFFF"
     canvas.fillRect(0, 0, width, startY)
@@ -1020,7 +1020,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         rayWidth = size / spread
     }
     
-    if (startFlag || paused) {
+    if (startFlag) {
 
         if (tutorialCount == 0) {
             canvas.font = String(size/6) + "px Arial"
@@ -1081,7 +1081,35 @@ function changeWindow() { //changes window size and puts menus? CHANGE
     }
 
     if (paused) {
-        canvas.drawImage(pauseImg, startX, startY, size, size)
+        // canvas.drawImage(pauseImg, startX, startY, size, size)
+
+        canvas.fillStyle = "#000000"
+
+        canvas.font = String(size/5) + "px Arial"
+        canvas.textAlign = "left"
+        canvas.fillText("Paused.", startX + size * 0.13, startY + size * 0.2)
+
+        canvas.font = String(size/10) + "px Arial"
+        canvas.fillText("click to resume", startX + size * 0.13, startY + size * 0.3)
+
+        canvas.font = String(size/15) + "px Arial"
+        canvas.textAlign = "left"
+        canvas.fillText("Graphics   -                  +", startX + size * 0.13, startY + size * 0.41)
+        canvas.textAlign = "center"
+        canvas.font = String(size/20) + "px Arial"
+        canvas.fillText(String(renderModes[render]), startX + size * 0.65, startY + size * 0.41)
+        canvas.font = String(size/15) + "px Arial"
+        canvas.strokeStyle = "#000000"
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
+        canvas.strokeRect(startX + size * 0.41, startY + size * 0.34, size * 0.1, size * 0.1)
+        canvas.strokeRect(startX + size * 0.78, startY + size * 0.34, size * 0.1, size * 0.1)
+
+        canvas.textAlign = "left"
+        canvas.fillText("Sensitivity -                   +", startX + size * 0.13, startY + size * 0.55)
+        canvas.textAlign = "center"
+        canvas.fillText(String(Math.floor(sens * 100) / 100), startX + size * 0.65, startY + size * 0.55)
+        canvas.strokeStyle = "#000000"
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.48, size * 0.76, size * 0.1)
     }
 
     // canvas.fillStyle = "#FFFFFF"
@@ -1254,16 +1282,36 @@ var tutorialCount = 0 //page of tutorial
 var canChooseDifficulty = false //whether user can choose difficulty screen
 var chasing = false
 
+
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
 
-c.addEventListener("click", async () => {
+c.addEventListener("click", async (e) => {
     if (tutorial) {
         if (startFlag) {
             startFlag = false
             winTimer = Date.now()
         }
-        if ((canClick) && (!win)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
+
+        let clickOut = true
+
+        if (paused) {
+            let x = e.clientX - c.getBoundingClientRect().left
+            let y = e.clientY - c.getBoundingClientRect().top
+            if ((x > startX + size * 0.41) && (x < startX + size * 0.51) && (y > startY + 0.34 * size) && (y < startY + 0.44 * size)) {
+                if (render < 9) {
+                    render += 2
+                }
+                clickOut = false
+            } else if ((x > startX + size * 0.78) && (x < startX + size * 0.88) && (y > startY + 0.34 * size) && (y < startY + 0.44 * size)) {
+                if (render > 1) {
+                    render -= 2
+                }
+                clickOut = false
+            }
+        }
+
+        if ((canClick) && (!win) && (clickOut)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
             canClick = false
             paused = false
             keys = {}
@@ -1273,9 +1321,9 @@ c.addEventListener("click", async () => {
                 chase[level].play()
             }
             if(!document.pointerLockElement) {
-            await c.requestPointerLock({
-                unadjustedMovement: true,
-            })
+                await c.requestPointerLock({
+                    unadjustedMovement: true,
+                })
             }
         } else if ((winTrans > 1) || (jumpscare > 1)) {
             window.location.reload()
@@ -1301,7 +1349,7 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
         
         if (String(e.key).toLowerCase() == "r") {
             if (render < 8) {
-                render+= 2
+                render += 2
             } else {
                 render = 1
             }
@@ -1319,7 +1367,6 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
                 difficulty = 0
                 tutorial = true
                 canChooseDifficulty = false
-                console.log(tutorialCount, "huh")
                 tutorialCount++
                 exploredTiles = initialiseMaze()
             } else if ((String(e.key).toLowerCase() == "c")) {
