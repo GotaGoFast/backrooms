@@ -1125,14 +1125,10 @@ function mainloop() { //controls all function
 
     }
 
-    canvas.fillStyle = "#FFFFFF"
-    canvas.fillRect(0, 0, canvas.canvas.width, startY)
-    canvas.fillRect(0, size + startY, canvas.canvas.width, canvas.canvas.height - (size + startY))
-
     canvas.strokeStyle = "#000000"
     canvas.lineWidth = Math.ceil(size/100)
-    canvas.strokeRect(startX, startY, size, size)
     canvas.strokeRect(0, 0, canvas.canvas.width, canvas.canvas.height)
+    canvas.strokeRect(startX, startY, size, size)
     
     requestAnimationFrame(mainloop)
 
