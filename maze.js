@@ -261,7 +261,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
             let randEnt = rand(0, entityList.length - 1)
             let randPos = rand(0, tileSize - 1)
             let randPos2 = rand(0, tileSize - 1)
-            while (wallTiles.includes(tile[randPos][randPos2])) { //making sure it doesnt spawn in wall
+            while (wallTiles.includes(tile[randPos2][randPos])) { //making sure it doesnt spawn in wall
                 randPos = rand(0, tileSize - 1)
                 randPos2 = rand(0, tileSize - 1)
             }
@@ -617,7 +617,7 @@ function keysGameProcessing() { //moderates keys that can be held
         sens -= 0.15 * deltaTime
     }
 
-    let moveDir = 0
+    let moveDir = "no"
 
     if ((keys["a"]) && !(keys["d"])) {
         if ((keys["s"]) && !(keys["w"])) {
@@ -641,7 +641,7 @@ function keysGameProcessing() { //moderates keys that can be held
         moveDir = 180
     }
 
-    if ((keys["w"]) || (keys["a"]) || (keys["s"]) || (keys["d"])) {
+    if (((keys["w"]) || (keys["a"]) || (keys["s"]) || (keys["d"])) && (moveDir != "no")) {
         let verts = [[0.4, 0.4], [0.4, -0.4], [-0.4, -0.4], [-0.4, 0.4]]
         let mazeModX = 0
         let mazeModY = 0
@@ -909,7 +909,11 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
 
             canvas.beginPath()
 
-            canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth + 1, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
+            if (rayWidth != 1) {
+
+            canvas.fillRect(startX + Math.floor((roofs.length - m - 1) * rayWidth), startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
+
+            }
             
             canvas.closePath()
         }
