@@ -85,7 +85,10 @@ function lockChangeAlert() { //when user enters or exists pointer lock
     } else { //going from the game to a pause menu
         document.removeEventListener("mousemove", updatePosition, false);
         if ((!win) && (!dead)) { //only allows pause if gamer hasnt won yet and isnt dead
-            L0S1.pause()
+            ambience[level].pause()
+            if (chasing) {
+                chase[level].pause()
+            }
             winTimerCumulative += Date.now() - winTimer
             paused = true
             setTimeout(allowResume, 1500)
@@ -243,7 +246,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 }
 
             }
-            // if ((picker < 20 - 5 * difficulty) && (mazeX != "no")) { //elevator spawn (yes its manual, im lazy)
+            if ((picker < 20 - 5 * difficulty) && (mazeX != "no")) { //elevator spawn (yes its manual, im lazy)
                 let spotX = rand(0, tileSize - 4)
                 let spotY = rand(0, tileSize - 4)
                 tile[spotY][spotX] = 5
@@ -262,7 +265,7 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
                 tile[spotY + 2][spotX + 1] = 7
                 tile[spotY + 1][spotX + 2] = 8
                 tile[spotY + 2][spotX + 2] = 8
-            // }
+            }
         } else { //tile type 2 (pluses)
             tile = []
             let roww = []
@@ -456,9 +459,10 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
             dead = true
             winTimerCumulative += Date.now() - winTimer
             entityKilled = entities[k].type
-            L0S1.pause()
-            L0Jump.currentTime = 3
-            L0Jump.play()
+            ambience[level].pause()
+            jumpscareSound.currentTime = 3
+            jumpscareSound.play()
+            document.exitPointerLock()
 
         }
 
@@ -576,6 +580,36 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
             entityClose = "RUN."
         }
     }
+
+    if (chasing) {
+        if (entityClose == "be careful...") {
+            chase[level].volume = 0.1
+        }
+        
+        if (entityClose == "watch out...") {
+            chase[level].volume = 0.2
+        }
+        
+        if (entityClose == "IT'S COMING") {
+            chase[level].volume = 0.5
+        }
+        
+        if (entityClose == "RUN.") {
+            chase[level].volume = 0
+            ambience[level].volume = 0
+        } else {
+            ambience[level].volume = 1
+        }
+    }
+
+    if ((entityClose != 0) && (!chasing)) {
+        chasing = true
+        chase[level].play()
+    } else if ((entityClose == "") && (chasing)) {
+        chasing = false
+        chase[level].pause()
+    }
+
     entitiesHit.sort(sortFunction)
     entitiesHit.reverse()
 }
@@ -1013,14 +1047,6 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
     canvas.fillRect(startX + size, startY, width - size - startX, size)
 }
 
-// //sound processing
-// function manageSounds() {
-//     if (L0S1.ended) {
-//         L0S1.load()
-//         L0S1.play()
-//     }
-// }
-
 //other
 class Entity { //entity class
     constructor(mazePosX, mazePosY, tilePosX, tilePosY, type, shadow) {
@@ -1082,13 +1108,13 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             document.exitPointerLock()
         } else {
             winTrans += 0.2 * deltaTime
-            if (L0S1.volume > 0.2 * deltaTime) {
-                L0S1.volume -= 0.2 * deltaTime
+            if (ambience[level].volume > 0.2 * deltaTime) {
+                ambience[level].volume -= 0.2 * deltaTime
             }
             if (winTrans > 1) {
-                L0S1.pause()
-                L0S3.loop = true
-                L0S3.play()
+                ambience[level].pause()
+                winSound.loop = true
+                winSound.play()
             }
         }
     }
@@ -1102,7 +1128,6 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             // canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
             canvas.fillText(String(winTimerCumulative / 1000), startX + 0.1 * size, startY + size * 0.55)
             // canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
-            document.exitPointerLock()
         } else {
             jumpscare += deltaTime
             if (rand(0, Math.ceil(0.1 / deltaTime)) == 0) {
@@ -1111,11 +1136,11 @@ function changeWindow() { //changes window size and puts menus? CHANGE
                 canvas.fillStyle = "#000000"
             }
             canvas.fillRect(startX, startY, size, size)
-            canvas.drawImage(smiler, startX + rand(0, Math.ceil(tileSize / 100)), startY + rand(0, Math.ceil(tileSize / 100)), 0.9 * size, 0.9 * size)
+            canvas.drawImage(entityKilled, startX + rand(0, Math.ceil(tileSize / 100)), startY + rand(0, Math.ceil(tileSize / 100)), 0.9 * size, 0.9 * size)
             if (jumpscare > 1) {
-                L0Jump.pause()
-                L0S2.loop = true
-                L0S2.play()
+                jumpscareSound.pause()
+                deathSound.loop = true
+                deathSound.play()
             }
         }
     }
@@ -1185,84 +1210,69 @@ var canvas = c.getContext("2d"); //getting canvas context
 //STORES
 const tileSize = 100 //size of each tile
 const renderDist = 100 //distance, in blocks, that player can see (technically not straight distance)
-var opaqueTiles = [1, 2, 4, 5, 6] //tiles which you can't see through
-var wallTiles = [1, 2, 4, 5, 6] //tiles which you can't walk through
+var opaqueTiles = [1, 2, 5, 6] //tiles which you can't see through
+var wallTiles = [1, 2, 5, 6] //tiles which you can't walk through
 const viewRadius = Math.ceil(renderDist/tileSize) + 1 //how many tiles which can be generated away
 const renderModes = ["", "super high", "", "high", "", "medium", "", "low", "", "ultra low"] //shortcut list for render modes
 const difficulties = ["easy", "medium", "hard"] //list for difficulties
 
 //ENTITIES
-const smiler = new Image()
-smiler.src = "images/smiler.png"
-const smilerOver = new Image()
-smilerOver.src = "images/smiler_overlay.png"
-const sketch = new Image()
-sketch.src = "images/sketch.png"
-const sketchOver = new Image()
-sketchOver.src = "images/sketch_overlay.png"
-const creep = new Image()
-creep.src = "images/creep.png"
-const creepOver = new Image()
-creepOver.src = "images/creep_overlay.png"
-
-const entityList = [creep, sketch, smiler]
-const shadowList = [creepOver, sketchOver, smilerOver]
+var entityList = []
+var shadowList = []
+for (let i = 0; i < 3; i++) {
+    entityList.push(new Image())
+    entityList[i].src = "images/entities/entity_" + String(i) + ".png"
+    shadowList.push(new Image())
+    shadowList[i].src = "images/entities/entity_" + String(i) + "_shadow.png"
+}
 
 //WALL TEXTURES
-const L0W1 = new Image()
-L0W1.src = "images/level_0_wall.png"
-const L0W2 = new Image()
-L0W2.src = "images/level_0_column.png"
-const L0W3 = new Image()
-L0W3.src = "images/level_0_elevator_wall.png"
-const L0W4 = new Image()
-L0W4.src = "images/level_0_elevator_door.png"
+var levelTextures = [{1: false, 2: false, 5: false, 6: false}]
+for (let i = 0; i < levelTextures.length; i++) {
+    let j = 0
+    for (let property in levelTextures[i]) {
+        levelTextures[i][property] = new Image()
+        levelTextures[i][property].src = "images/walls/level_" + String(i) + "_wall_" + String(j) + ".png"
+        j++
+    }
+}
 
-const levelTextures = [{1: L0W1, 2: L0W2, 5: L0W3, 6: L0W4}]
 const roofColours = [{0: "#f2ec90", 3: "#ffffff", 6: "#666459", 7: "#666459", 8: "#666459"}]
 
 //SLIDES
-const start0 = new Image()
-start0.src = "images/start_0.png"
-const start1 = new Image()
-start1.src = "images/start_1.png"
-const start2 = new Image()
-start2.src = "images/start_2.png"
-const start3 = new Image()
-start3.src = "images/start_3.png"
-const start4 = new Image()
-start4.src = "images/start_4.png"
-const start5 = new Image()
-start5.src = "images/start_5.png"
-const start6 = new Image()
-start6.src = "images/start_6.png"
-const start7 = new Image()
-start7.src = "images/start_7.png"
-const start8 = new Image()
-start8.src = "images/start_8.png"
-const start9 = new Image()
-start9.src = "images/start_9.png"
+var startImages = []
 
-const startImages = [start0, start1, start2, start3, start4, start5, start6, start7, start8, start9]
+for (i = 0; i < 10; i++) {
+    startImages.push(new Image())
+    startImages[i].src = "images/screens/start_" + String(i) + ".png"
+}
 
 //OTHER SCREENS
 const pauseImg = new Image()
-pauseImg.src = "images/paused.png"
+pauseImg.src = "images/screens/paused.png"
 const deathImg = new Image()
-deathImg.src = "images/deathScreen.png"
+deathImg.src = "images/screens/deathScreen.png"
 const winImg = new Image()
-winImg.src = "images/winScreen.png"
+winImg.src = "images/screens/winScreen.png"
 
 //SOUNDS
-const L0S1 = new Audio()
-L0S1.src = "sounds/level_0_ambience.mp3"
-const L0S2 = new Audio()
-L0S2.src = "sounds/level_0_death.mp3"
-const L0S3 = new Audio()
-L0S3.src = "sounds/level_0_win.mp3"
+var ambience = []
+var chase = []
+for (let i = 0; i < levelTextures.length; i++) {
+    ambience.push(new Audio())
+    ambience[i].src = "sounds/level_" + String(i) + "_ambience.mp3"
+    chase.push(new Audio())
+    chase[i].src = "sounds/level_" + String(i) + "_chase.mp3"
+}
 
-const L0Jump = new Audio()
-L0Jump.src = "sounds/level_0_jumpscare.mp3"
+
+const deathSound = new Audio()
+deathSound.src = "sounds/death.mp3"
+const winSound = new Audio()
+winSound.src = "sounds/win.mp3"
+
+const jumpscareSound = new Audio()
+jumpscareSound.src = "sounds/jumpscare.mp3"
 
 //VARS
 var width = window.innerWidth - 30; //width of canvas
@@ -1311,6 +1321,7 @@ var entityClose = "" //entity text
 var tutorial = false //has tutorial been completed
 var tutorialCount = 0 //page of tutorial
 var canChooseDifficulty = false //whether user can choose difficulty screen
+var chasing = false
 
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
@@ -1325,8 +1336,11 @@ c.addEventListener("click", async () => {
             canClick = false
             paused = false
             keys = {}
-            L0S1.loop = true
-            L0S1.play()
+            ambience[level].loop = true
+            ambience[level].play()
+            if (chasing) {
+                chase[level].play()
+            }
             if(!document.pointerLockElement) {
             await c.requestPointerLock({
                 unadjustedMovement: true,
