@@ -1,25 +1,3 @@
-//OBSOLETE / TEST FUNCTIONS
-function cropImageData(array, width, sx, sy, swidth, sheight) { //OBSOLETE TEST FUNCTION
-    let result = []
-    for (let y = sy; y < sy + sheight; y++) {
-        for (let x = sx * 4; x < (sx + swidth) * 4; x++) {
-            result.push(array[4 * y * width + x])
-        }
-    }
-    result = new ImageData(new Uint8ClampedArray(result), swidth, sheight)
-    return result
-}
-
-function convertArr(arr, x, y) { // OBSOLETE TEST FUNCTION
-    let result = []
-
-    for (let i = 0; i < arr.length / 4; i+=4) {
-        result.push(arr.slice(i, i+4))
-    }
-
-    return result
-}
-
 //FUNCTIONS CALLED FROM EVENT LISTENERS
 function updatePosition(e) { //update position based on mouse movement and sens
     angle -= e.movementX * 0.2 * sens
