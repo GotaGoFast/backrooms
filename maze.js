@@ -481,8 +481,8 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
                     // console.log("im at the target")
                     entities[k].targeting = []
                 } else {
-                    entities[k].eTilePosX += Math.abs(Math.cos(rad(entityAngle))) * Math.sign(targetTotalX - entTotalX) * deltaTime * (7 + 3 * difficulty)
-                    entities[k].eTilePosY += Math.abs(Math.sin(rad(entityAngle))) * Math.sign(targetTotalY - entTotalY) * deltaTime * (7 + 3 * difficulty)
+                    entities[k].eTilePosX += Math.abs(Math.cos(Math.atan(Math.abs(targetTotalY - entTotalY) / Math.abs(targetTotalX - entTotalX)))) * Math.sign(targetTotalX - entTotalX) * deltaTime * (7 + 3 * difficulty)
+                    entities[k].eTilePosY += Math.abs(Math.sin(Math.atan(Math.abs(targetTotalY - entTotalY) / Math.abs(targetTotalX - entTotalX)))) * Math.sign(targetTotalY - entTotalY) * deltaTime * (7 + 3 * difficulty)
                     if (entities[k].eTilePosX < 0) {
                         entities[k].eMazePosX --
                         entities[k].eTilePosX += tileSize
