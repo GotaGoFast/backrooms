@@ -531,6 +531,7 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
     if ((entityClose != 0) && (!chasing)) {
         chasing = true
         chase[level].play()
+        console.log("hi")
     } else if ((entityClose == "") && (chasing)) {
         chasing = false
         chase[level].pause()
@@ -889,7 +890,11 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
 
             if (rayWidth != 1) {
 
-            canvas.fillRect(startX + Math.floor((roofs.length - m - 1) * rayWidth), startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
+                canvas.fillRect(startX + Math.floor((roofs.length - m - 1) * rayWidth), startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth + 1, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
+
+            } else {
+
+                canvas.fillRect(startX + Math.floor((roofs.length - m - 1) * rayWidth), startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
 
             }
             
