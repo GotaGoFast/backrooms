@@ -107,6 +107,14 @@ function nextInt(value, direction) { //returns what the next int is in a directi
     }
 }
 
+function mouseInBounds(multX, multY, multX2, multY2) {
+    if ((mouseX > startX + size * multX) && (mouseX < startX + size * multY) && (mouseY > startY + size * multX2) && (mouseY < startY + size * multY2)) {
+        return true
+    } else {
+        return false
+    }
+}
+
 //MAZE GENERATION FUNCTIONS
 function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
 
@@ -587,13 +595,6 @@ function keysGameProcessing() { //moderates keys that can be held
         sprinting = false
     }
 
-    if ((keys["t"]) && (sens < 2)) {
-        sens += 0.15 * deltaTime
-    }
-    if ((keys["y"]) && (sens > 0.1)) {
-        sens -= 0.15 * deltaTime
-    }
-
     let moveDir = "no"
 
     if ((keys["a"]) && !(keys["d"])) {
@@ -962,7 +963,7 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
     canvas.fillStyle = "#000000"
     
     if (!win) {
-        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Graphics: " + String(renderModes[render]) + " | Mouse sensitivity: " + String(Math.floor(sens * 100) / 100) + " | Difficulty: " + String(difficulties[difficulty]), startX + 0.05 * size, startY + 0.08 * size)
+        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Difficulty: " + String(difficulties[difficulty]), startX + 0.05 * size, startY + 0.08 * size)
     }
 
     canvas.fillStyle = "#000000"
@@ -1092,9 +1093,9 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.font = String(size/10) + "px Arial"
         canvas.fillText("click to resume", startX + size * 0.13, startY + size * 0.3)
 
-        canvas.font = String(size/15) + "px Arial"
+        canvas.font = String(size/20) + "px Arial"
         canvas.textAlign = "left"
-        canvas.fillText("Graphics   -                  +", startX + size * 0.13, startY + size * 0.41)
+        canvas.fillText("Graphics         -                         +", startX + size * 0.13, startY + size * 0.41)
         canvas.textAlign = "center"
         canvas.font = String(size/20) + "px Arial"
         canvas.fillText(String(renderModes[render]), startX + size * 0.65, startY + size * 0.41)
@@ -1104,12 +1105,17 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.strokeRect(startX + size * 0.41, startY + size * 0.34, size * 0.1, size * 0.1)
         canvas.strokeRect(startX + size * 0.78, startY + size * 0.34, size * 0.1, size * 0.1)
 
+        canvas.font = String(size/20) + "px Arial"
         canvas.textAlign = "left"
-        canvas.fillText("Sensitivity -                   +", startX + size * 0.13, startY + size * 0.55)
+        canvas.fillText("Sensitivity       -                         +", startX + size * 0.13, startY + size * 0.52)
         canvas.textAlign = "center"
-        canvas.fillText(String(Math.floor(sens * 100) / 100), startX + size * 0.65, startY + size * 0.55)
+        canvas.font = String(size/20) + "px Arial"
+        canvas.fillText(String(Math.floor(sens * 100) / 100), startX + size * 0.65, startY + size * 0.52)
+        canvas.font = String(size/15) + "px Arial"
         canvas.strokeStyle = "#000000"
-        canvas.strokeRect(startX + size * 0.12, startY + size * 0.48, size * 0.76, size * 0.1)
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
+        canvas.strokeRect(startX + size * 0.41, startY + size * 0.45, size * 0.1, size * 0.1)
+        canvas.strokeRect(startX + size * 0.78, startY + size * 0.45, size * 0.1, size * 0.1)
     }
 
     // canvas.fillStyle = "#FFFFFF"
@@ -1281,12 +1287,17 @@ var tutorial = false //has tutorial been completed
 var tutorialCount = 0 //page of tutorial
 var canChooseDifficulty = false //whether user can choose difficulty screen
 var chasing = false
+var mouseX = 0
+var mouseY = 0
 
 
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
 
 c.addEventListener("click", async (e) => {
+    mouseX = e.clientX - c.getBoundingClientRect().left
+    mouseY = e.clientY - c.getBoundingClientRect().top
+
     if (tutorial) {
         if (startFlag) {
             startFlag = false
@@ -1296,19 +1307,27 @@ c.addEventListener("click", async (e) => {
         let clickOut = true
 
         if (paused) {
-            let x = e.clientX - c.getBoundingClientRect().left
-            let y = e.clientY - c.getBoundingClientRect().top
-            if ((x > startX + size * 0.41) && (x < startX + size * 0.51) && (y > startY + 0.34 * size) && (y < startY + 0.44 * size)) {
+            clickOut = false
+            if (mouseInBounds(0.41, 0.51, 0.34, 0.44)) {
                 if (render < 9) {
                     render += 2
                 }
-                clickOut = false
-            } else if ((x > startX + size * 0.78) && (x < startX + size * 0.88) && (y > startY + 0.34 * size) && (y < startY + 0.44 * size)) {
+            } else if (mouseInBounds(0.78, 0.88, 0.34, 0.44)) {
                 if (render > 1) {
                     render -= 2
                 }
-                clickOut = false
+            } else if (mouseInBounds(0.41, 0.51, 0.45, 0.55)) {
+                if (sens > 0.12) {
+                    sens -= 0.1
+                }
+            } else if (mouseInBounds(0.78, 0.88, 0.45, 0.55)) {
+                if (sens < 1.9) {
+                    sens += 0.1
+                }
+            } else {
+                clickOut = true
             }
+    
         }
 
         if ((canClick) && (!win) && (clickOut)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
@@ -1344,14 +1363,6 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
             e.preventDefault()
             if (!jump) {
                 jump = true
-            }
-        }
-        
-        if (String(e.key).toLowerCase() == "r") {
-            if (render < 8) {
-                render += 2
-            } else {
-                render = 1
             }
         }
 
