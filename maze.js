@@ -1026,13 +1026,72 @@ function changeWindow() { //changes window size and puts menus? CHANGE
     
     if (startFlag) {
 
-        if (tutorialCount == 0) {
+        if ((!settings) && (!howToPlay) && (!canChooseDifficulty) && (!canStart)) {
+            canvas.strokeStyle = "#000000"
+
+            if (((logoFlicker < 1) && (rand(0, 2/deltaTime) != 0))) {
+                canvas.font = String(size/10) + "px Arial"
+                canvas.textAlign = "center"
+                canvas.fillText("ENDROOMS", startX + size * 0.5, startY + size * 0.15)
+                canvas.fillText("ONLINE", startX + size * 0.5, startY + size * 0.26)
+            } else {
+                logoFlicker += rand(0, (1/deltaTime)/20)
+                if (logoFlicker >= (1/deltaTime)/5) {
+                    logoFlicker = 0
+                }
+            }
+
+            canvas.font = String(size/20) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("Enter the Endrooms...", startX + size * 0.5, startY + size * 0.41)
+            canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
+
+            canvas.strokeStyle = "#000000"
+            canvas.font = String(size/20) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("Settings", startX + size * 0.5, startY + size * 0.52)
+            canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
+
+            canvas.strokeStyle = "#000000"
+            canvas.font = String(size/20) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("How to Play", startX + size * 0.5, startY + size * 0.63)
+            canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+        } else if (canChooseDifficulty) {
+
+            canvas.font = String(size/10) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("choose difficulty", startX + size * 0.5, startY + size * 0.15)
+
+            canvas.font = String(size/20) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("Easy", startX + size * 0.5, startY + size * 0.41)
+            canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
+
+            canvas.strokeStyle = "#000000"
+            canvas.font = String(size/20) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("Medium", startX + size * 0.5, startY + size * 0.52)
+            canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
+
+            canvas.strokeStyle = "#000000"
+            canvas.font = String(size/20) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("Hard", startX + size * 0.5, startY + size * 0.63)
+            canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+        } else if (canStart) {
+            canvas.font = String(size/10) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("click to start", startX + size * 0.5, startY + size * 0.15)
+        }
+
+        if ((tutorialStart) && (tutorialCount == 0)) {
             canvas.font = String(size/6) + "px Arial"
             canvas.textAlign = "center"
             canvas.fillText("LOADING...", startX + size / 2, startY + size / 2)
         }
 
-        canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
+        // canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
     }
 
     if (win) {
@@ -1084,7 +1143,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         }
     }
 
-    if (paused) {
+    if ((paused) || (settings)) {
         // canvas.drawImage(pauseImg, startX, startY, size, size)
 
         canvas.fillStyle = "#000000"
@@ -1095,7 +1154,11 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.fillText("Paused.", startX + size * 0.13, startY + size * 0.2)
 
         canvas.font = String(size/10) + "px Arial"
-        canvas.fillText("click to resume", startX + size * 0.13, startY + size * 0.3)
+        if (paused) {
+            canvas.fillText("click to resume", startX + size * 0.13, startY + size * 0.3)
+        } else {
+            canvas.fillText("click to go back", startX + size * 0.13, startY + size * 0.3)
+        }
 
         canvas.font = String(size/20) + "px Arial"
         canvas.textAlign = "left"
@@ -1311,7 +1374,7 @@ if (localStorage.sensitivity) {
     var sens = 1
 }
 var entityClose = "" //entity text
-var tutorial = false //has tutorial been completed
+var canStart = false //has tutorial been completed
 var tutorialCount = 0 //page of tutorial
 var canChooseDifficulty = false //whether user can choose difficulty screen
 var chasing = false
@@ -1322,6 +1385,10 @@ if (localStorage.musicMute) {
 } else {
     var mute = 0
 }
+var settings = false
+var tutorialStart = false
+var logoFlicker = 0
+var howToPlay = false
 
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
@@ -1330,7 +1397,7 @@ c.addEventListener("click", async (e) => {
     mouseX = e.clientX - c.getBoundingClientRect().left
     mouseY = e.clientY - c.getBoundingClientRect().top
 
-    if (tutorial) {
+    if (canStart) {
         if (startFlag) {
             startFlag = false
             winTimer = Date.now()
@@ -1373,7 +1440,7 @@ c.addEventListener("click", async (e) => {
                     mute = 1
                     pauseSound.pause()
                     winSound.volume = 1
-                    deathSound.volume = 0
+                    deathSound.volume = 1
                     localStorage.musicMute = 1
                 }
             } else {
@@ -1382,7 +1449,7 @@ c.addEventListener("click", async (e) => {
     
         }
 
-        if ((canClick) && (!win) && (clickOut)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
+        if ((canClick) && (clickOut)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
             pauseSound.pause()
             canClick = false
             paused = false
@@ -1401,11 +1468,30 @@ c.addEventListener("click", async (e) => {
             window.location.reload()
         }
     } else {
-        if ((tutorialCount != 7) && (tutorialCount != 8)) {
-            tutorialCount ++
-        }
-        if (tutorialCount == 7) {
-            canChooseDifficulty = true
+        if (!canChooseDifficulty) {
+            if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
+                canChooseDifficulty = true
+            }
+        } else {
+            if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
+                difficulty = 0
+                canStart = true
+                canChooseDifficulty = false
+                tutorialCount++
+                exploredTiles = initialiseMaze()
+            } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
+                difficulty = 1
+                canStart = true
+                canChooseDifficulty = false
+                tutorialCount++
+                exploredTiles = initialiseMaze()
+            } else if (mouseInBounds(0.12, 0.76, 0.56, 0.66)) {
+                difficulty = 2
+                canStart = true
+                canChooseDifficulty = false
+                tutorialCount++
+                exploredTiles = initialiseMaze()
+            }
         }
     }
 })
@@ -1424,28 +1510,6 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
             opaqueTiles.splice(opaqueTiles.indexOf(6), 1)
             wallTiles.splice(wallTiles.indexOf(6), 1)
             opened = true
-        }
-
-        if (canChooseDifficulty) {
-            if ((String(e.key).toLowerCase() == "x")) {
-                difficulty = 0
-                tutorial = true
-                canChooseDifficulty = false
-                tutorialCount++
-                exploredTiles = initialiseMaze()
-            } else if ((String(e.key).toLowerCase() == "c")) {
-                difficulty = 1
-                tutorial = true
-                canChooseDifficulty = false
-                tutorialCount++
-                exploredTiles = initialiseMaze()
-            } else if ((String(e.key).toLowerCase() == "v")) {
-                difficulty = 2
-                tutorial = true
-                canChooseDifficulty = false
-                tutorialCount++
-                exploredTiles = initialiseMaze()
-            }
         }
 
         if (!startFlag) {
