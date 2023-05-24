@@ -14,6 +14,9 @@ function lockChangeAlert() { //when user enters or exists pointer lock
             if (chasing) {
                 chase[level].pause()
             }
+            if (mute == 0) {
+                pauseSound.play()
+            }
             winTimerCumulative += Date.now() - winTimer
             paused = true
             setTimeout(allowResume, 1500)
@@ -1085,6 +1088,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         // canvas.drawImage(pauseImg, startX, startY, size, size)
 
         canvas.fillStyle = "#000000"
+        canvas.lineWidth = size / 250
 
         canvas.font = String(size/5) + "px Arial"
         canvas.textAlign = "left"
@@ -1116,6 +1120,19 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
         canvas.strokeRect(startX + size * 0.41, startY + size * 0.45, size * 0.1, size * 0.1)
         canvas.strokeRect(startX + size * 0.78, startY + size * 0.45, size * 0.1, size * 0.1)
+
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "left"
+        canvas.fillText("Music               ON            OFF", startX + size * 0.13, startY + size * 0.63)
+        canvas.textAlign = "center"
+        canvas.font = String(size/15) + "px Arial"
+        canvas.strokeStyle = "#000000"
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+        canvas.lineWidth = size / 250 * (2-mute)
+        canvas.strokeRect(startX + size * 0.41, startY + size * 0.56, size * 0.235, size * 0.1)
+        canvas.lineWidth = size / 250 * (1+ mute)
+        canvas.strokeRect(startX + size * 0.645, startY + size * 0.56, size * 0.235, size * 0.1)
+        canvas.lineWidth = size / 250
     }
 
     // canvas.fillStyle = "#FFFFFF"
@@ -1207,7 +1224,7 @@ const roofColours = [{0: "#f2ec90", 3: "#ffffff", 6: "#666459", 7: "#666459", 8:
 //SLIDES
 var startImages = []
 
-for (i = 0; i < 10; i++) {
+for (i = 0; i < 9; i++) {
     startImages.push(new Image())
     startImages[i].src = "images/screens/start_" + String(i) + ".png"
 }
@@ -1235,6 +1252,9 @@ const deathSound = new Audio()
 deathSound.src = "sounds/death.mp3"
 const winSound = new Audio()
 winSound.src = "sounds/win.mp3"
+const pauseSound = new Audio()
+pauseSound.src = "sounds/pause.mp3"
+pauseSound.loop = true
 
 const jumpscareSound = new Audio()
 jumpscareSound.src = "sounds/jumpscare.mp3"
@@ -1268,7 +1288,11 @@ var jumpP = 0 //jump height
 var timeSinceJump = 0 //time since jump using deltatime
 var speed = 1 //speed of player modifier
 var deltaTimer = 0 //helps with deltatime
-var render = 5 //pixels per slice
+if (localStorage.graphics) {
+    var render = Number(localStorage.graphics) //pixels per slice
+} else {
+    var render = 5
+}
 var spread = 250 //number of rays based on pixels per slice
 var winOption = 0 //able to open elevator doors
 var opened = false //elevator doors open?
@@ -1281,7 +1305,11 @@ var jumpscare = 0 //jumpscare timer
 var entityKilled = 0 //entity which killed player
 var entitiesHit = [] //entities which are in view
 var difficulty = 1 //difficulty
-var sens = 1 //sentitivity multiplier
+if (localStorage.sensitivity) {
+    var sens = Number(localStorage.sensitivity) //sens
+} else {
+    var sens = 1
+}
 var entityClose = "" //entity text
 var tutorial = false //has tutorial been completed
 var tutorialCount = 0 //page of tutorial
@@ -1289,7 +1317,11 @@ var canChooseDifficulty = false //whether user can choose difficulty screen
 var chasing = false
 var mouseX = 0
 var mouseY = 0
-
+if (localStorage.musicMute) {
+    var mute = Number(localStorage.musicMute) //pixels per slice
+} else {
+    var mute = 0
+}
 
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
@@ -1311,18 +1343,38 @@ c.addEventListener("click", async (e) => {
             if (mouseInBounds(0.41, 0.51, 0.34, 0.44)) {
                 if (render < 9) {
                     render += 2
+                    localStorage.graphics = String(render)
                 }
             } else if (mouseInBounds(0.78, 0.88, 0.34, 0.44)) {
                 if (render > 1) {
                     render -= 2
+                    localStorage.graphics = String(render)
                 }
             } else if (mouseInBounds(0.41, 0.51, 0.45, 0.55)) {
                 if (sens > 0.12) {
                     sens -= 0.1
+                    localStorage.sensitivity = String(sens)
                 }
             } else if (mouseInBounds(0.78, 0.88, 0.45, 0.55)) {
                 if (sens < 1.9) {
                     sens += 0.1
+                    localStorage.sensitivity = String(sens)
+                }
+            } else if (mouseInBounds(0.41, 0.645, 0.56, 0.66)) {
+                if (mute == 1) {
+                    mute = 0
+                    pauseSound.play()
+                    winSound.volume = 0
+                    deathSound.volume = 0
+                    localStorage.musicMute = 0
+                }
+            } else if (mouseInBounds(0.645, 0.88, 0.56, 0.66)) {
+                if (mute == 0) {
+                    mute = 1
+                    pauseSound.pause()
+                    winSound.volume = 1
+                    deathSound.volume = 0
+                    localStorage.musicMute = 1
                 }
             } else {
                 clickOut = true
@@ -1331,6 +1383,7 @@ c.addEventListener("click", async (e) => {
         }
 
         if ((canClick) && (!win) && (clickOut)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
+            pauseSound.pause()
             canClick = false
             paused = false
             keys = {}
@@ -1348,10 +1401,10 @@ c.addEventListener("click", async (e) => {
             window.location.reload()
         }
     } else {
-        if ((tutorialCount != 8) && (tutorialCount != 9)) {
+        if ((tutorialCount != 7) && (tutorialCount != 8)) {
             tutorialCount ++
         }
-        if (tutorialCount == 8) {
+        if (tutorialCount == 7) {
             canChooseDifficulty = true
         }
     }
