@@ -1026,7 +1026,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
     
     if (startFlag) {
 
-        if ((!settings) && (!howToPlay) && (!canChooseDifficulty) && (!canStart)) {
+        if ((!settings) && (!howToPlay) && (!canChooseDifficulty) && (!canStart) && (!tutorialStart)) {
             canvas.strokeStyle = "#000000"
 
             if (((logoFlicker < 1) && (rand(0, 2/deltaTime) != 0))) {
@@ -1198,6 +1198,10 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.lineWidth = size / 250
     }
 
+    if (tutorialStart) {
+        canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
+    }
+
     // canvas.fillStyle = "#FFFFFF"
     // canvas.fillRect(0, 0, canvas.canvas.width, startY)
     // canvas.fillRect(0, size + startY, canvas.canvas.width, canvas.canvas.height - (size + startY))
@@ -1287,7 +1291,7 @@ const roofColours = [{0: "#f2ec90", 3: "#ffffff", 6: "#666459", 7: "#666459", 8:
 //SLIDES
 var startImages = []
 
-for (i = 0; i < 9; i++) {
+for (i = 0; i < 7; i++) {
     startImages.push(new Image())
     startImages[i].src = "images/screens/start_" + String(i) + ".png"
 }
@@ -1397,15 +1401,16 @@ c.addEventListener("click", async (e) => {
     mouseX = e.clientX - c.getBoundingClientRect().left
     mouseY = e.clientY - c.getBoundingClientRect().top
 
-    if (canStart) {
-        if (startFlag) {
+    if ((canStart) || (settings)) {
+        if ((startFlag) && (!settings)) {
             startFlag = false
             winTimer = Date.now()
         }
 
         let clickOut = true
 
-        if (paused) {
+        if ((paused) || (settings)) {
+
             clickOut = false
             if (mouseInBounds(0.41, 0.51, 0.34, 0.44)) {
                 if (render < 9) {
@@ -1449,7 +1454,7 @@ c.addEventListener("click", async (e) => {
     
         }
 
-        if ((canClick) && (clickOut)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
+        if ((canClick) && (clickOut) && (!settings)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
             pauseSound.pause()
             canClick = false
             paused = false
@@ -1466,31 +1471,40 @@ c.addEventListener("click", async (e) => {
             }
         } else if ((winTrans > 1) || (jumpscare > 1)) {
             window.location.reload()
+        } else if ((clickOut) && (settings)) {
+            settings = false
         }
     } else {
-        if (!canChooseDifficulty) {
+        if ((!canChooseDifficulty) && (!settings) && (!tutorialStart)) {
             if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
                 canChooseDifficulty = true
+            } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
+                settings = true
+            } else if (mouseInBounds(0.12, 0.76, 0.56, 0.66)) {
+                tutorialStart = true
             }
-        } else {
+        } else if ((!canStart) && (!tutorialStart)) {
             if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
                 difficulty = 0
                 canStart = true
                 canChooseDifficulty = false
-                tutorialCount++
                 exploredTiles = initialiseMaze()
             } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
                 difficulty = 1
                 canStart = true
                 canChooseDifficulty = false
-                tutorialCount++
                 exploredTiles = initialiseMaze()
             } else if (mouseInBounds(0.12, 0.76, 0.56, 0.66)) {
                 difficulty = 2
                 canStart = true
                 canChooseDifficulty = false
-                tutorialCount++
                 exploredTiles = initialiseMaze()
+            }
+        } else if (tutorialStart) {
+            tutorialCount++
+            if (tutorialCount == 7) {
+                tutorialCount = 0
+                tutorialStart = false
             }
         }
     }
