@@ -820,10 +820,10 @@ function raysGameProcessing() { //raycasts from player and gets wall and ceiling
 
             floorDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
 
-            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (roofs[i].length < Math.floor(renderDist / 2))) {
+            if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) > 0) && (roofs[i].length < ceilRenderDist)) {
                 //normal ray hit
                 roofs[i].push([floorDist, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]])
-            } else if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) && (roofs[i].length < Math.floor(renderDist / 2))) {
+            } else if (((size - (size / floorDist)) / 2 + (size * jumpP / floorDist) < 0) && (roofs[i].length < ceilRenderDist)) {
                 //ray hit out of camera
                 roofs[i][0] = [1 - 2 * jumpP, exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX]]
             // } else if (roofs[i].length == Math.floor(renderDist / 2)) {
@@ -1137,6 +1137,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             canvas.drawImage(entityKilled, startX + rand(0, Math.ceil(tileSize / 100)), startY + rand(0, Math.ceil(tileSize / 100)), 0.9 * size, 0.9 * size)
             if (jumpscare > 1) {
                 jumpscareSound.pause()
+                console.log(deathSound.volume)
                 deathSound.loop = true
                 deathSound.play()
             }
@@ -1162,7 +1163,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
 
         canvas.font = String(size/20) + "px Arial"
         canvas.textAlign = "left"
-        canvas.fillText("Graphics         -                         +", startX + size * 0.13, startY + size * 0.41)
+        canvas.fillText("Textures         -                         +", startX + size * 0.13, startY + size * 0.41)
         canvas.textAlign = "center"
         canvas.font = String(size/20) + "px Arial"
         canvas.fillText(String(renderModes[render]), startX + size * 0.65, startY + size * 0.41)
@@ -1196,6 +1197,18 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.lineWidth = size / 250 * (1+ mute)
         canvas.strokeRect(startX + size * 0.645, startY + size * 0.56, size * 0.235, size * 0.1)
         canvas.lineWidth = size / 250
+
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "left"
+        canvas.fillText("render dist.     -                         +", startX + size * 0.13, startY + size * 0.74)
+        canvas.textAlign = "center"
+        canvas.font = String(size/20) + "px Arial"
+        canvas.fillText(String(ceilRenderDist), startX + size * 0.65, startY + size * 0.74)
+        canvas.font = String(size/15) + "px Arial"
+        canvas.strokeStyle = "#000000"
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.67, size * 0.76, size * 0.1)
+        canvas.strokeRect(startX + size * 0.41, startY + size * 0.67, size * 0.1, size * 0.1)
+        canvas.strokeRect(startX + size * 0.78, startY + size * 0.67, size * 0.1, size * 0.1)
     }
 
     if (tutorialStart) {
@@ -1212,6 +1225,12 @@ function changeWindow() { //changes window size and puts menus? CHANGE
     // canvas.strokeRect(0, 0, canvas.canvas.width, canvas.canvas.height)
 }
 
+function misc() {
+    if ((paused) && (pauseSound.volume + deltaTime < 1))  {
+        pauseSound.volume += 0.25 * deltaTime
+    }
+}
+
 //MAINLOOP
 function mainloop() { //controls all function
 
@@ -1224,6 +1243,8 @@ function mainloop() { //controls all function
     deltaTimer = Date.now() //initialise timer for between frames
 
     changeWindow() //adjusts window size, pause, win, lose, initial screens
+
+    misc()
 
     if ((!paused) && (!startFlag) && (!(winTrans > 1)) && (!dead)) {
 
@@ -1393,6 +1414,11 @@ var settings = false
 var tutorialStart = false
 var logoFlicker = 0
 var howToPlay = false
+if (localStorage.ceilDist) {
+    var ceilRenderDist = Number(localStorage.ceilDist)
+} else {
+    var ceilRenderDist = 50
+}
 
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
@@ -1435,18 +1461,33 @@ c.addEventListener("click", async (e) => {
             } else if (mouseInBounds(0.41, 0.645, 0.56, 0.66)) {
                 if (mute == 1) {
                     mute = 0
-                    pauseSound.play()
-                    winSound.volume = 0
-                    deathSound.volume = 0
+
+                    if (paused) {
+                        pauseSound.play()
+                    }
+                    winSound.volume = 1
+                    deathSound.volume = 1
                     localStorage.musicMute = 0
                 }
             } else if (mouseInBounds(0.645, 0.88, 0.56, 0.66)) {
                 if (mute == 0) {
                     mute = 1
-                    pauseSound.pause()
-                    winSound.volume = 1
-                    deathSound.volume = 1
+
+                    if (paused) {
+                        pauseSound.pause()
+                    }
+
+                    winSound.volume = 0
+                    deathSound.volume = 0
                     localStorage.musicMute = 1
+                }
+            } else if (mouseInBounds(0.41, 0.51, 0.67, 0.77)) {
+                if (ceilRenderDist - 4 > 25) {
+                    ceilRenderDist -= 4
+                }
+            } else if (mouseInBounds(0.78, 0.88, 0.67, 0.77)) {
+                if (ceilRenderDist + 4 < renderDist * 0.75) {
+                    ceilRenderDist += 4
                 }
             } else {
                 clickOut = true
@@ -1456,6 +1497,7 @@ c.addEventListener("click", async (e) => {
 
         if ((canClick) && (clickOut) && (!settings)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
             pauseSound.pause()
+            pauseSound.volume = 0
             canClick = false
             paused = false
             keys = {}
