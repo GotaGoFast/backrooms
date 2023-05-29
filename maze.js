@@ -1209,6 +1209,19 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.strokeRect(startX + size * 0.12, startY + size * 0.67, size * 0.76, size * 0.1)
         canvas.strokeRect(startX + size * 0.41, startY + size * 0.67, size * 0.1, size * 0.1)
         canvas.strokeRect(startX + size * 0.78, startY + size * 0.67, size * 0.1, size * 0.1)
+
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "left"
+        canvas.fillText("Mobile controls     ON          OFF", startX + size * 0.13, startY + size * 0.85)
+        canvas.textAlign = "center"
+        canvas.font = String(size/15) + "px Arial"
+        canvas.strokeStyle = "#000000"
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.78, size * 0.76, size * 0.1)
+        canvas.lineWidth = size / 250 * (1+mobile)
+        canvas.strokeRect(startX + size * 0.50, startY + size * 0.78, size * 0.19, size * 0.1)
+        canvas.lineWidth = size / 250 * (2-mobile)
+        canvas.strokeRect(startX + size * 0.69, startY + size * 0.78, size * 0.19, size * 0.1)
+        canvas.lineWidth = size / 250
     }
 
     if (tutorialStart) {
@@ -1419,6 +1432,7 @@ if (localStorage.ceilDist) {
 } else {
     var ceilRenderDist = 50
 }
+var mobile = 1
 
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
@@ -1484,10 +1498,24 @@ c.addEventListener("click", async (e) => {
             } else if (mouseInBounds(0.41, 0.51, 0.67, 0.77)) {
                 if (ceilRenderDist - 4 > 25) {
                     ceilRenderDist -= 4
+                    localStorage.ceilDist = ceilRenderDist
                 }
             } else if (mouseInBounds(0.78, 0.88, 0.67, 0.77)) {
                 if (ceilRenderDist + 4 < renderDist * 0.75) {
                     ceilRenderDist += 4
+                    localStorage.ceilDist = ceilRenderDist
+                }
+            } else if (mouseInBounds(0.50, 0.69, 0.78, 0.88)) {
+                if (mobile == 0) {
+                    mobile = 1
+
+                    localStorage.mobileControls = 1
+                }
+            }  else if (mouseInBounds(0.69, 0.88, 0.78, 0.88)) {
+                if (mobile == 1) {
+                    mobile = 0
+
+                    localStorage.mobileControls = 0
                 }
             } else {
                 clickOut = true
@@ -1506,7 +1534,7 @@ c.addEventListener("click", async (e) => {
             if (chasing) {
                 chase[level].play()
             }
-            if(!document.pointerLockElement) {
+            if((!document.pointerLockElement) && (mobile == 0)) {
                 await c.requestPointerLock({
                     unadjustedMovement: true,
                 })
@@ -1517,7 +1545,9 @@ c.addEventListener("click", async (e) => {
             settings = false
         }
     } else {
-        if ((!canChooseDifficulty) && (!settings) && (!tutorialStart)) {
+        if (!paused) {
+            console.log("bruh")
+        } else if ((!canChooseDifficulty) && (!settings) && (!tutorialStart)) {
             if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
                 canChooseDifficulty = true
             } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
@@ -1586,5 +1616,9 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
 window.addEventListener('keyup', function (e) { //activates whenever a key is released
     keys[String(e.key).toLowerCase()] = false
 }, false);
+
+c.addEventListener("touchstart", function (e) {
+    // console.log(e.touches)
+})
 
 mainloop() //starting the program
