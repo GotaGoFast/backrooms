@@ -6,7 +6,7 @@ function updatePosition(e) { //update position based on mouse movement and sens
 function lockChangeAlert() { //when user enters or exists pointer lock
     if (document.pointerLockElement === c) { //going from a pause menu to the game
         document.addEventListener("mousemove", updatePosition, false);
-        winTimer = Date.now()
+        gameTimer = Date.now()
     } else { //going from the game to a pause menu
         document.removeEventListener("mousemove", updatePosition, false);
         if ((!win) && (!dead)) { //only allows pause if gamer hasnt won yet and isnt dead
@@ -17,8 +17,9 @@ function lockChangeAlert() { //when user enters or exists pointer lock
             if (mute == 0) {
                 pauseSound.play()
             }
-            winTimerCumulative += Date.now() - winTimer
-            paused = true
+            gameTimerCumulative += Date.now() - gameTimer
+            pauseScreen = true
+            gameScreen = false
             setTimeout(allowResume, 1500)
         }
     }
@@ -243,8 +244,6 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
             }
         }
 
-        // console.log(rand(1, 7 - 2 * difficulty) == 1)
-
         if ((mazeX != "no") && (rand(1, 5 - 2 * difficulty) == 1)){ //probability of entity based on preference and difficulty
             let randEnt = rand(0, entityList.length - 1)
             let randPos = rand(0, tileSize - 1)
@@ -393,7 +392,8 @@ function entitiesGameProcessing() { //moves entities and moderates behaviour fro
 
         if (entityDist < 2) {
             dead = true
-            winTimerCumulative += Date.now() - winTimer
+            gameScreen = false
+            gameTimerCumulative += Date.now() - gameTimer
             entityKilled = entities[k].type
             ambience[level].pause()
             jumpscareSound.currentTime = 3
@@ -676,7 +676,7 @@ function keysGameProcessing() { //moderates keys that can be held
                     opaqueTiles.push(6)
                     wallTiles.push(6)
                     win = true
-                    winTimerCumulative += Date.now() - winTimer
+                    gameTimerCumulative += Date.now() - gameTimer
                 }
             }
 
@@ -1023,76 +1023,134 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         spread = size / render
         rayWidth = size / spread
     }
-    
-    if (startFlag) {
 
-        if ((!settings) && (!howToPlay) && (!canChooseDifficulty) && (!canStart) && (!tutorialStart)) {
-            canvas.strokeStyle = "#000000"
+    if (menuScreen) {
+        canvas.strokeStyle = "#000000"
 
-            if (((logoFlicker < 1) && (rand(0, 2/deltaTime) != 0))) {
-                canvas.font = String(size/10) + "px Arial"
-                canvas.textAlign = "center"
-                canvas.fillText("ENDROOMS", startX + size * 0.5, startY + size * 0.15)
-                canvas.fillText("ONLINE", startX + size * 0.5, startY + size * 0.26)
-            } else {
-                logoFlicker += rand(0, (1/deltaTime)/20)
-                if (logoFlicker >= (1/deltaTime)/5) {
-                    logoFlicker = 0
-                }
+        if (((logoFlicker < 1) && (rand(0, 2/deltaTime) != 0))) {
+            canvas.font = String(size/10) + "px Arial"
+            canvas.textAlign = "center"
+            canvas.fillText("ENDROOMS", startX + size * 0.5, startY + size * 0.15)
+            canvas.fillText("ONLINE", startX + size * 0.5, startY + size * 0.26)
+        } else {
+            logoFlicker += rand(0, (1/deltaTime)/20)
+            if (logoFlicker >= (1/deltaTime)/5) {
+                logoFlicker = 0
             }
-
-            canvas.font = String(size/20) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("Enter the Endrooms...", startX + size * 0.5, startY + size * 0.41)
-            canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
-
-            canvas.strokeStyle = "#000000"
-            canvas.font = String(size/20) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("Settings", startX + size * 0.5, startY + size * 0.52)
-            canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
-
-            canvas.strokeStyle = "#000000"
-            canvas.font = String(size/20) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("How to Play", startX + size * 0.5, startY + size * 0.63)
-            canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
-        } else if (canChooseDifficulty) {
-
-            canvas.font = String(size/10) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("choose difficulty", startX + size * 0.5, startY + size * 0.15)
-
-            canvas.font = String(size/20) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("Easy", startX + size * 0.5, startY + size * 0.41)
-            canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
-
-            canvas.strokeStyle = "#000000"
-            canvas.font = String(size/20) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("Medium", startX + size * 0.5, startY + size * 0.52)
-            canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
-
-            canvas.strokeStyle = "#000000"
-            canvas.font = String(size/20) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("Hard", startX + size * 0.5, startY + size * 0.63)
-            canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
-        } else if (canStart) {
-            canvas.font = String(size/10) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("click to start", startX + size * 0.5, startY + size * 0.15)
         }
+    
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("Enter the Endrooms...", startX + size * 0.5, startY + size * 0.41)
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
 
-        if ((tutorialStart) && (tutorialCount == 0)) {
-            canvas.font = String(size/6) + "px Arial"
-            canvas.textAlign = "center"
-            canvas.fillText("LOADING...", startX + size / 2, startY + size / 2)
-        }
+        canvas.strokeStyle = "#000000"
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("Settings", startX + size * 0.5, startY + size * 0.52)
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
 
-        // canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
+        canvas.strokeStyle = "#000000"
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("How to Play", startX + size * 0.5, startY + size * 0.63)
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+    } else if (difficultyScreen) {
+        canvas.font = String(size/10) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("choose difficulty", startX + size * 0.5, startY + size * 0.15)
+
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("Easy", startX + size * 0.5, startY + size * 0.41)
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
+
+        canvas.strokeStyle = "#000000"
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("Medium", startX + size * 0.5, startY + size * 0.52)
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
+
+        canvas.strokeStyle = "#000000"
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("Hard", startX + size * 0.5, startY + size * 0.63)
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+    } else if (startScreen) {
+        canvas.font = String(size/10) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("click to start", startX + size * 0.5, startY + size * 0.15)
     }
+    
+    // if (startFlag) {
+
+    //     if ((!settings) && (!howToPlay) && (!canChooseDifficulty) && (!canStart) && (!tutorialStart)) {
+    //         canvas.strokeStyle = "#000000"
+
+    //         if (((logoFlicker < 1) && (rand(0, 2/deltaTime) != 0))) {
+    //             canvas.font = String(size/10) + "px Arial"
+    //             canvas.textAlign = "center"
+    //             canvas.fillText("ENDROOMS", startX + size * 0.5, startY + size * 0.15)
+    //             canvas.fillText("ONLINE", startX + size * 0.5, startY + size * 0.26)
+    //         } else {
+    //             logoFlicker += rand(0, (1/deltaTime)/20)
+    //             if (logoFlicker >= (1/deltaTime)/5) {
+    //                 logoFlicker = 0
+    //             }
+    //         }
+
+    //         canvas.font = String(size/20) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("Enter the Endrooms...", startX + size * 0.5, startY + size * 0.41)
+    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
+
+    //         canvas.strokeStyle = "#000000"
+    //         canvas.font = String(size/20) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("Settings", startX + size * 0.5, startY + size * 0.52)
+    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
+
+    //         canvas.strokeStyle = "#000000"
+    //         canvas.font = String(size/20) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("How to Play", startX + size * 0.5, startY + size * 0.63)
+    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+    //     } else if (canChooseDifficulty) {
+
+    //         canvas.font = String(size/10) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("choose difficulty", startX + size * 0.5, startY + size * 0.15)
+
+    //         canvas.font = String(size/20) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("Easy", startX + size * 0.5, startY + size * 0.41)
+    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
+
+    //         canvas.strokeStyle = "#000000"
+    //         canvas.font = String(size/20) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("Medium", startX + size * 0.5, startY + size * 0.52)
+    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
+
+    //         canvas.strokeStyle = "#000000"
+    //         canvas.font = String(size/20) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("Hard", startX + size * 0.5, startY + size * 0.63)
+    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+    //     } else if (canStart) {
+    //         canvas.font = String(size/10) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("click to start", startX + size * 0.5, startY + size * 0.15)
+    //     }
+
+    //     if ((tutorialStart) && (tutorialCount == 0)) {
+    //         canvas.font = String(size/6) + "px Arial"
+    //         canvas.textAlign = "center"
+    //         canvas.fillText("LOADING...", startX + size / 2, startY + size / 2)
+    //     }
+
+    //     // canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
+    // }
 
     if (win) {
         if (winTrans > 1) {
@@ -1101,7 +1159,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             canvas.drawImage(winImg, startX, startY, size, size)
             // canvas.fillText("congrats, you escaped!", startX + size / 2, startY + size * 0.2)
             // canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
-            canvas.fillText(String(winTimerCumulative / 1000), startX + size * 0.1, startY + size * 0.55)
+            canvas.fillText(String(gameTimerCumulative / 1000), startX + size * 0.1, startY + size * 0.55)
             // canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
             document.exitPointerLock()
         } else {
@@ -1124,7 +1182,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             canvas.drawImage(deathImg, startX, startY, size, size)
             // canvas.fillText("you died", startX + size / 2, startY + size * 0.2)
             // canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
-            canvas.fillText(String(winTimerCumulative / 1000), startX + 0.1 * size, startY + size * 0.55)
+            canvas.fillText(String(gameTimerCumulative / 1000), startX + 0.1 * size, startY + size * 0.55)
             // canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
         } else {
             jumpscare += deltaTime
@@ -1144,7 +1202,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         }
     }
 
-    if ((paused) || (settings)) {
+    if ((pauseScreen) || (settingsScreen)) {
         // canvas.drawImage(pauseImg, startX, startY, size, size)
 
         canvas.fillStyle = "#000000"
@@ -1155,7 +1213,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.fillText("Paused.", startX + size * 0.13, startY + size * 0.2)
 
         canvas.font = String(size/10) + "px Arial"
-        if (paused) {
+        if (pauseScreen) {
             canvas.fillText("click to resume", startX + size * 0.13, startY + size * 0.3)
         } else {
             canvas.fillText("click to go back", startX + size * 0.13, startY + size * 0.3)
@@ -1224,7 +1282,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.lineWidth = size / 250
     }
 
-    if (tutorialStart) {
+    if (tutorialScreen) {
         canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
     }
 
@@ -1239,7 +1297,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
 }
 
 function misc() {
-    if ((paused) && (pauseSound.volume + deltaTime < 1))  {
+    if ((pauseScreen) && (pauseSound.volume + deltaTime < 1))  {
         pauseSound.volume += 0.25 * deltaTime
     }
 }
@@ -1259,7 +1317,7 @@ function mainloop() { //controls all function
 
     misc()
 
-    if ((!paused) && (!startFlag) && (!(winTrans > 1)) && (!dead)) {
+    if (gameScreen) {
 
         physicsGameProcessing()
 
@@ -1361,78 +1419,107 @@ const jumpscareSound = new Audio()
 jumpscareSound.src = "sounds/jumpscare.mp3"
 
 //VARS
+
+//canvas
 var width = window.innerWidth - 30; //width of canvas
 var height = window.innerHeight - 30; //height of canvas
-var rayWidth = 0 //width in pixels of each ray, should be int
-var size = 0 //size of game screen
 var startX = 0 //pixel dist between canvas edge and game screen X
 var startY = 0 //pixel dist between canvas edge and game screen Y
+var size = 0 //size of game screen
+var rayWidth = 0 //width in pixels of each ray, should be int
+var spread = 250 //number of rays based on pixels per slice
+
+//map
+var exploredTiles = [] //maze 4d array
+var level = 0 //current level (obsolete for now)
+
+//player
 var tilePosX = 0.5 //position on the tile X
 var tilePosY = 0.5 //position on the tile Y
 var mazePosX = viewRadius //position of tile on maze X
 var mazePosY = viewRadius //position of tile on maze Y
 var angle = 0 //angle of player from right anticlockwise
-var keys = {} //keys pressed
+var viewAngle = 60 //angle that user can see (60 is good)
+
+//entities
 var entities = [] //list of entities as objects
-var level = 0 //current level (obsolete for now)
-var exploredTiles = [] //maze 4d array
-var paused = false //paused
-var canClick = true //can user enter pointer lock
+var entityClose = "" //entity text
+var entityKilled = 0 //entity which killed player
+var entitiesHit = [] //entities which are in view
+var chasing = false //is there entity message on screen
+
+//movement
+var keys = {} //keys pressed
+var mouseX = 0
+var mouseY = 0
 var sprint = 5 // seconds of sprint
 var sprinting = false //is sprinting
 var sprintTimer = 0 //timer for sprint to start going back up
-var startFlag = true //can user click to start game
-var deltaTime = 0 //time per frame in seconds
-var viewAngle = 60 //angle that user can see (60 is good)
 var jump = false //is jumping
 var jumpP = 0 //jump height
 var timeSinceJump = 0 //time since jump using deltatime
 var speed = 1 //speed of player modifier
+
+//gameplay
+var winOption = 0 //able to open elevator doors
+var opened = false //elevator doors open?
+var win = false //user has won
+var dead = false //user dead
+var gameTimer = 0 //timer of game
+var gameTimerCumulative = 0 //timer of game helper
+var difficulty = 1 //difficulty
+
+//mainloop
+var deltaTime = 0 //time per frame in seconds
 var deltaTimer = 0 //helps with deltatime
+
+//screen vars
+var pauseScreen = false //pause screen (from game)
+var startFlag = true //can user click to start game
+var canClick = false //can user enter pointer lock
+var winTrans = 0 //transparency of win fade
+var jumpscare = 0 //jumpscare timer
+var canStart = false //has tutorial been completed
+var tutorialCount = 0 //page of tutorial
+var canChooseDifficulty = false //whether user can choose difficulty screen
+var settings = false
+var tutorialStart = false
+var logoFlicker = 0
+var howToPlay = false
+
+var menuScreen = true
+var settingsScreen = false
+var tutorialScreen = false
+var difficultyScreen = false
+var startScreen = false
+var gameScreen
+
+//settings
 if (localStorage.graphics) {
     var render = Number(localStorage.graphics) //pixels per slice
 } else {
     var render = 5
 }
-var spread = 250 //number of rays based on pixels per slice
-var winOption = 0 //able to open elevator doors
-var opened = false //elevator doors open?
-var win = false //user has won
-var winTrans = 0 //transparency of win fade
-var winTimer = 0 //timer of game
-var winTimerCumulative = 0 //timer of game helper
-var dead = false //us dead
-var jumpscare = 0 //jumpscare timer
-var entityKilled = 0 //entity which killed player
-var entitiesHit = [] //entities which are in view
-var difficulty = 1 //difficulty
+
 if (localStorage.sensitivity) {
     var sens = Number(localStorage.sensitivity) //sens
 } else {
     var sens = 1
 }
-var entityClose = "" //entity text
-var canStart = false //has tutorial been completed
-var tutorialCount = 0 //page of tutorial
-var canChooseDifficulty = false //whether user can choose difficulty screen
-var chasing = false
-var mouseX = 0
-var mouseY = 0
+
 if (localStorage.musicMute) {
     var mute = Number(localStorage.musicMute) //pixels per slice
 } else {
     var mute = 0
 }
-var settings = false
-var tutorialStart = false
-var logoFlicker = 0
-var howToPlay = false
+
 if (localStorage.ceilDist) {
     var ceilRenderDist = Number(localStorage.ceilDist)
 } else {
     var ceilRenderDist = 50
 }
-var mobile = 1
+
+var mobile = 0
 
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
@@ -1441,17 +1528,19 @@ c.addEventListener("click", async (e) => {
     mouseX = e.clientX - c.getBoundingClientRect().left
     mouseY = e.clientY - c.getBoundingClientRect().top
 
-    if ((canStart) || (settings)) {
-        if ((startFlag) && (!settings)) {
-            startFlag = false
-            winTimer = Date.now()
+    let clickOut = true
+
+    if (gameScreen) {
+        if (mouseInBounds(0.85, 0.95, 0.05, 0.1)) {
+            gameScreen = false
+            pauseScreen = true
+            setTimeout(allowResume, 1500)
         }
+    }
 
-        let clickOut = true
+    if ((pauseScreen) || (settingsScreen)) {
+        clickOut = false
 
-        if ((paused) || (settings)) {
-
-            clickOut = false
             if (mouseInBounds(0.41, 0.51, 0.34, 0.44)) {
                 if (render < 9) {
                     render += 2
@@ -1476,9 +1565,10 @@ c.addEventListener("click", async (e) => {
                 if (mute == 1) {
                     mute = 0
 
-                    if (paused) {
+                    if (pauseScreen) {
                         pauseSound.play()
                     }
+
                     winSound.volume = 1
                     deathSound.volume = 1
                     localStorage.musicMute = 0
@@ -1487,7 +1577,7 @@ c.addEventListener("click", async (e) => {
                 if (mute == 0) {
                     mute = 1
 
-                    if (paused) {
+                    if (pauseScreen) {
                         pauseSound.pause()
                     }
 
@@ -1511,7 +1601,7 @@ c.addEventListener("click", async (e) => {
 
                     localStorage.mobileControls = 1
                 }
-            }  else if (mouseInBounds(0.69, 0.88, 0.78, 0.88)) {
+            } else if (mouseInBounds(0.69, 0.88, 0.78, 0.88)) {
                 if (mobile == 1) {
                     mobile = 0
 
@@ -1519,65 +1609,68 @@ c.addEventListener("click", async (e) => {
                 }
             } else {
                 clickOut = true
+                if (settingsScreen) {
+                    settingsScreen = false
+                    menuScreen = true
+                }
             }
-    
-        }
 
-        if ((canClick) && (clickOut) && (!settings)) { //only will go from paused to unpaused if gamer hasnt won yet and isnt already in game
-            pauseSound.pause()
-            pauseSound.volume = 0
-            canClick = false
-            paused = false
-            keys = {}
-            ambience[level].loop = true
-            ambience[level].play()
-            if (chasing) {
-                chase[level].play()
-            }
-            if((!document.pointerLockElement) && (mobile == 0)) {
-                await c.requestPointerLock({
-                    unadjustedMovement: true,
-                })
-            }
-        } else if ((winTrans > 1) || (jumpscare > 1)) {
-            window.location.reload()
-        } else if ((clickOut) && (settings)) {
-            settings = false
+    }
+
+    if ((startScreen) || ((canClick) && (clickOut))) {
+        startScreen = false
+        pauseScreen = false
+        gameScreen = true
+        pauseSound.pause()
+        pauseSound.volume = 0
+        canClick = false
+        keys = {}
+        ambience[level].loop = true
+        ambience[level].play()
+        if (chasing) {
+            chase[level].play()
         }
-    } else {
-        if (!paused) {
-            console.log("bruh")
-        } else if ((!canChooseDifficulty) && (!settings) && (!tutorialStart)) {
-            if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
-                canChooseDifficulty = true
-            } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
-                settings = true
-            } else if (mouseInBounds(0.12, 0.76, 0.56, 0.66)) {
-                tutorialStart = true
-            }
-        } else if ((!canStart) && (!tutorialStart)) {
-            if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
-                difficulty = 0
-                canStart = true
-                canChooseDifficulty = false
-                exploredTiles = initialiseMaze()
-            } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
-                difficulty = 1
-                canStart = true
-                canChooseDifficulty = false
-                exploredTiles = initialiseMaze()
-            } else if (mouseInBounds(0.12, 0.76, 0.56, 0.66)) {
-                difficulty = 2
-                canStart = true
-                canChooseDifficulty = false
-                exploredTiles = initialiseMaze()
-            }
-        } else if (tutorialStart) {
-            tutorialCount++
-            if (tutorialCount == 7) {
-                tutorialCount = 0
-                tutorialStart = false
-            }
+        if ((!document.pointerLockElement) && (mobile == 0)) {
+            await c.requestPointerLock({
+                unadjustedMovement: true,
+            })
+        }
+    } else if ((winTrans > 1) || (jumpscare > 1)) {
+        window.location.reload()
+    } else if (menuScreen) {
+        if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
+            difficultyScreen = true
+            menuScreen = false
+        } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
+            settingsScreen = true
+            menuScreen = false
+        } else if (mouseInBounds(0.12, 0.76, 0.56, 0.66)) {
+            tutorialScreen = true
+            menuScreen = false
+        }
+    } else if (difficultyScreen) {
+        if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
+            difficulty = 0
+            startScreen = true
+            difficultyScreen = false
+            exploredTiles = initialiseMaze()
+        } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
+            difficulty = 1
+            startScreen = true
+            difficultyScreen = false
+            exploredTiles = initialiseMaze()
+        } else if (mouseInBounds(0.12, 0.76, 0.56, 0.66)) {
+            difficulty = 2
+            startScreen = true
+            difficultyScreen = false
+            exploredTiles = initialiseMaze()
+        }
+    } else if (tutorialScreen) {
+        tutorialCount++
+        if (tutorialCount == 7) {
+            tutorialCount = 0
+            tutorialScreen = false
+            menuScreen = true
         }
     }
 })
@@ -1598,12 +1691,12 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
             opened = true
         }
 
-        if (!startFlag) {
+        if (tutorialCount == 7) {
 
-            if ((String(e.key).toLowerCase() == "p") && (tutorialCount == 9)) {
+            if (String(e.key).toLowerCase() == "p") {
                 window.open("https://docs.google.com/document/d/1pMc_EMAaEXr7hqRP8DBKRCGqPtd_estMuHSFS0-Qa_k/edit?usp=sharing")
             }
-            if ((String(e.key).toLowerCase() == "o") && (tutorialCount == 9)) {
+            if (String(e.key).toLowerCase() == "o") {
                 window.open("https://docs.google.com/document/d/1Wt2AdKdIfuwpbc7C2yA4vDrZmIs2LJPcsr0EcVpdMzU/edit?usp=sharing")
             }
 
@@ -1618,7 +1711,11 @@ window.addEventListener('keyup', function (e) { //activates whenever a key is re
 }, false);
 
 c.addEventListener("touchstart", function (e) {
-    // console.log(e.touches)
+    console.log(e.targetTouches)
+})
+
+c.addEventListener("touchmove", function (e) {
+    console.log(e.changedTouches)
 })
 
 mainloop() //starting the program
