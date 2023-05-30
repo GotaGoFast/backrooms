@@ -912,13 +912,13 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
             canvas.beginPath()
 
             if (Math.ceil(rays[l][5] * 125 + rayWidth * 500 / rays[l][1]) <= 125) {
-                canvas.drawImage(levelTextures[level][rays[l][3]], Math.floor(rays[l][5] * 125), 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
+                canvas.drawImage(levelTextures[level][rays[l][3]], rays[l][5] * 125, 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
             } else {
                 canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
             }
 
             canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 1 / (rays[l][2] + 1)) + ")"
-            canvas.fillRect(Math.floor(startX + (spread-rays[l][0]-1) * rayWidth), startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 2)
+            canvas.fillRect(startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 2)
     
             canvas.closePath()
 
@@ -966,7 +966,7 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
     canvas.fillStyle = "#000000"
     
     if (!win) {
-        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Difficulty: " + String(difficulties[difficulty]), startX + 0.05 * size, startY + 0.08 * size)
+        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Difficulty: " + String(difficulties[difficulty]) + String(mobileX), startX + 0.05 * size, startY + 0.08 * size)
     }
 
     canvas.fillStyle = "#000000"
