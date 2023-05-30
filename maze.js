@@ -1492,7 +1492,13 @@ var settingsScreen = false
 var tutorialScreen = false
 var difficultyScreen = false
 var startScreen = false
-var gameScreen
+var gameScreen = false
+
+//mobile bruh
+var mobileTimer = 0
+var mobileX = 0
+var mobileY = 0
+var mobileSkip = 0
 
 //settings
 if (localStorage.graphics) {
@@ -1711,11 +1717,21 @@ window.addEventListener('keyup', function (e) { //activates whenever a key is re
 }, false);
 
 c.addEventListener("touchstart", function (e) {
-    console.log(e.targetTouches)
+    mobileX = e.targetTouches[0].clientX
+    mobileY = e.targetTouches[0].clientY
+    mobileTimer = Date.now()
 })
 
 c.addEventListener("touchmove", function (e) {
-    console.log(e.changedTouches)
+    if (((Date.now() - mobileTimer) != 0) && (mobileSkip == 1)) {
+        angle -= 20 * sens * (e.changedTouches[0].clientX - mobileX) / (Date.now() - mobileTimer)
+        mobileSkip = 0
+    } else {
+        mobileSkip = 1
+    }
+    angle = getTrueAngle(angle)
+    mobileTimer = Date.now()
+    mobileX = e.changedTouches[0].clientX
 })
 
 mainloop() //starting the program
