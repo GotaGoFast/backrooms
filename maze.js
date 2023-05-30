@@ -892,11 +892,11 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
 
             if (rayWidth != 1) {
 
-                canvas.fillRect(startX + Math.floor((roofs.length - m - 1) * rayWidth), startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth + 1, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
+                canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth + 1, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
 
             } else {
 
-                canvas.fillRect(startX + Math.floor((roofs.length - m - 1) * rayWidth), startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
+                canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
 
             }
             
@@ -909,18 +909,18 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
     for (let k = 0; k < entitiesHit.length + 1; k++) { //for each entity that is hit
         while ((l < rays.length) && ((k == entitiesHit.length) || (rays[l][4] > entitiesHit[k][2]))) {
             //draw rays from back until each entity
-            canvas.beginPath()
+            // canvas.beginPath()
 
             if (Math.ceil(rays[l][5] * 125 + rayWidth * 500 / rays[l][1]) <= 125) {
                 canvas.drawImage(levelTextures[level][rays[l][3]], rays[l][5] * 125, 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
             } else {
-                canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
+                canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
             }
 
-            canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 1 / (rays[l][2] + 1)) + ")"
-            canvas.fillRect(startX + (spread-rays[l][0]-1) * rayWidth, startY + size/ 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, Math.ceil(rays[l][1]) + 2)
+            canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 2 / (rays[l][2] + 2)) + ")"
+            canvas.fillRect(startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, rays[l][1] + 2)
     
-            canvas.closePath()
+            // canvas.closePath()
 
             l++
         }
@@ -966,7 +966,7 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
     canvas.fillStyle = "#000000"
     
     if (!win) {
-        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Difficulty: " + String(difficulties[difficulty]) + String(mobileX), startX + 0.05 * size, startY + 0.08 * size)
+        canvas.fillText("FPS: " + String(Math.floor(1000 / (deltaTime * 1000))) + " | Difficulty: " + String(difficulties[difficulty]), startX + 0.05 * size, startY + 0.08 * size)
     }
 
     canvas.fillStyle = "#000000"
@@ -1013,7 +1013,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         if (width > height) {
             startY = 0
             size = height - height % render
-            startX = (width - (height - height % render)) / 2
+            startX = Math.floor((width - (height - height % render)) / 2)
         } else {
             startX = 0
             size = width - width % render
@@ -1076,6 +1076,13 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.textAlign = "center"
         canvas.fillText("Hard", startX + size * 0.5, startY + size * 0.63)
         canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+
+        canvas.strokeStyle = "#000000"
+        canvas.font = String(size/20) + "px Arial"
+        canvas.textAlign = "center"
+        canvas.fillText("Go Back", startX + size * 0.5, startY + size * 0.74)
+        canvas.strokeRect(startX + size * 0.12, startY + size * 0.67, size * 0.76, size * 0.1)
+
     } else if (startScreen) {
         canvas.font = String(size/10) + "px Arial"
         canvas.textAlign = "center"
@@ -1195,7 +1202,6 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             canvas.drawImage(entityKilled, startX + rand(0, Math.ceil(tileSize / 100)), startY + rand(0, Math.ceil(tileSize / 100)), 0.9 * size, 0.9 * size)
             if (jumpscare > 1) {
                 jumpscareSound.pause()
-                console.log(deathSound.volume)
                 deathSound.loop = true
                 deathSound.play()
             }
@@ -1267,19 +1273,6 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.strokeRect(startX + size * 0.12, startY + size * 0.67, size * 0.76, size * 0.1)
         canvas.strokeRect(startX + size * 0.41, startY + size * 0.67, size * 0.1, size * 0.1)
         canvas.strokeRect(startX + size * 0.78, startY + size * 0.67, size * 0.1, size * 0.1)
-
-        canvas.font = String(size/20) + "px Arial"
-        canvas.textAlign = "left"
-        canvas.fillText("Mobile controls     ON          OFF", startX + size * 0.13, startY + size * 0.85)
-        canvas.textAlign = "center"
-        canvas.font = String(size/15) + "px Arial"
-        canvas.strokeStyle = "#000000"
-        canvas.strokeRect(startX + size * 0.12, startY + size * 0.78, size * 0.76, size * 0.1)
-        canvas.lineWidth = size / 250 * (1+mobile)
-        canvas.strokeRect(startX + size * 0.50, startY + size * 0.78, size * 0.19, size * 0.1)
-        canvas.lineWidth = size / 250 * (2-mobile)
-        canvas.strokeRect(startX + size * 0.69, startY + size * 0.78, size * 0.19, size * 0.1)
-        canvas.lineWidth = size / 250
     }
 
     if (tutorialScreen) {
@@ -1494,12 +1487,6 @@ var difficultyScreen = false
 var startScreen = false
 var gameScreen = false
 
-//mobile bruh
-var mobileTimer = 0
-var mobileX = 0
-var mobileY = 0
-var mobileSkip = 0
-
 //settings
 if (localStorage.graphics) {
     var render = Number(localStorage.graphics) //pixels per slice
@@ -1524,8 +1511,6 @@ if (localStorage.ceilDist) {
 } else {
     var ceilRenderDist = 50
 }
-
-var mobile = 0
 
 //EVENT LISTENERS
 document.addEventListener("pointerlockchange", lockChangeAlert, false);
@@ -1601,18 +1586,7 @@ c.addEventListener("click", async (e) => {
                     ceilRenderDist += 4
                     localStorage.ceilDist = ceilRenderDist
                 }
-            } else if (mouseInBounds(0.50, 0.69, 0.78, 0.88)) {
-                if (mobile == 0) {
-                    mobile = 1
 
-                    localStorage.mobileControls = 1
-                }
-            } else if (mouseInBounds(0.69, 0.88, 0.78, 0.88)) {
-                if (mobile == 1) {
-                    mobile = 0
-
-                    localStorage.mobileControls = 0
-                }
             } else {
                 clickOut = true
                 if (settingsScreen) {
@@ -1636,7 +1610,7 @@ c.addEventListener("click", async (e) => {
         if (chasing) {
             chase[level].play()
         }
-        if ((!document.pointerLockElement) && (mobile == 0)) {
+        if (!document.pointerLockElement) {
             await c.requestPointerLock({
                 unadjustedMovement: true,
             })
@@ -1655,21 +1629,24 @@ c.addEventListener("click", async (e) => {
             menuScreen = false
         }
     } else if (difficultyScreen) {
-        if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
+        if (mouseInBounds(0.12, 0.88, 0.34, 0.44)) {
             difficulty = 0
             startScreen = true
             difficultyScreen = false
             exploredTiles = initialiseMaze()
-        } else if (mouseInBounds(0.12, 0.76, 0.45, 0.55)) {
+        } else if (mouseInBounds(0.12, 0.88, 0.45, 0.55)) {
             difficulty = 1
             startScreen = true
             difficultyScreen = false
             exploredTiles = initialiseMaze()
-        } else if (mouseInBounds(0.12, 0.76, 0.56, 0.66)) {
+        } else if (mouseInBounds(0.12, 0.88, 0.56, 0.66)) {
             difficulty = 2
             startScreen = true
             difficultyScreen = false
             exploredTiles = initialiseMaze()
+        } else if (mouseInBounds(0.12, 0.88, 0.67, 0.87)) {
+            menuScreen = true
+            difficultyScreen = false
         }
     } else if (tutorialScreen) {
         tutorialCount++
@@ -1715,23 +1692,5 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
 window.addEventListener('keyup', function (e) { //activates whenever a key is released
     keys[String(e.key).toLowerCase()] = false
 }, false);
-
-c.addEventListener("touchstart", function (e) {
-    mobileX = e.targetTouches[0].clientX
-    mobileY = e.targetTouches[0].clientY
-    mobileTimer = Date.now()
-})
-
-c.addEventListener("touchmove", function (e) {
-    if (((Date.now() - mobileTimer) != 0) && (mobileSkip == 1)) {
-        angle -= 20 * sens * (e.changedTouches[0].clientX - mobileX) / (Date.now() - mobileTimer)
-        mobileSkip = 0
-    } else {
-        mobileSkip = 1
-    }
-    angle = getTrueAngle(angle)
-    mobileTimer = Date.now()
-    mobileX = e.changedTouches[0].clientX
-})
 
 mainloop() //starting the program
