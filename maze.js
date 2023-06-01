@@ -135,6 +135,8 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
     }
 
     if (level == 0) { //level 0 generation
+    
+
         if (picker < 90) { //tile type 1
 
             //remember that density should be proportional to tilesize squared!!
@@ -255,6 +257,28 @@ function generateTile(mazeY, mazeX) { //generates a tile of size [tileSize]
             // if (entities.length < 3) {
             entities.push(new Entity(mazeX, mazeY, randPos + 0.5, randPos2 + 0.5, entityList[randEnt], shadowList[randEnt]))
             // }
+        }
+    } else if (level == 1) {
+
+        // let numLeft = tileSize * tileSize
+        // let randRoom = 0
+        // let pos = [1, 0]
+
+        // while (numLeft > 0) {
+        //     randRoom = rand(1, 3)
+        //     if (randRoom <= 2) {
+
+        //     } else {
+
+        //     }
+        // }
+
+        let randPos = 0
+        let randPos2 = 0
+        for (i = 0; i < tileSize * tileSize * 0.1; i++) {
+            randPos = rand(0, tileSize - 1)
+            randPos2 = rand(0, tileSize - 1)
+            tile[randPos][randPos2] = 1
         }
     }
 
@@ -667,17 +691,17 @@ function keysGameProcessing() { //moderates keys that can be held
                     tempTilePosY -= tileSize
                 }
 
-                if (wallTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][Math.floor(tempTilePosY)][Math.floor(tempTilePosX)])) {
+                if (wallTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][Math.floor(tempTilePosY)][Math.floor(tempTilePosX)]) && !((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][Math.floor(tempTilePosY)][Math.floor(tempTilePosX)] == 6) && (elevatorOpened == 1))) {
                     collided = 1
                     break
                 }
                 
-                if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][Math.floor(tempTilePosY)][Math.floor(tempTilePosX)] == 7) && !(wallTiles.includes(6))) {
-                    opaqueTiles.push(6)
-                    wallTiles.push(6)
-                    win = true
-                    gameTimerCumulative += Date.now() - gameTimer
-                }
+                // if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][Math.floor(tempTilePosY)][Math.floor(tempTilePosX)] == 7) && !(wallTiles.includes(6))) {
+                //     opaqueTiles.push(6)
+                //     wallTiles.push(6)
+                //     win = true
+                //     gameTimerCumulative += Date.now() - gameTimer
+                // }
             }
 
             if (collided == 1) {
@@ -709,6 +733,8 @@ function keysGameProcessing() { //moderates keys that can be held
         mazePosY ++
         tilePosY -= tileSize
     }
+
+    tileOn = exploredTiles[mazePosY][mazePosX][Math.floor(tilePosY)][Math.floor(tilePosX)]
 }
 
 function raysGameProcessing() { //raycasts from player and gets wall and ceiling values
@@ -732,7 +758,8 @@ function raysGameProcessing() { //raycasts from player and gets wall and ceiling
     let distInWall = 0 //distance in wall (for textures)
     let roofs = [] //list of roofs (3d i think)
     let floorDist = 0 //dist to a certain floor
-    winOption = 0 //make sure to reset the win option
+    elevatorOpenOption = 0 //make sure to reset the win option
+    elevatorCloseOption = 0
 
     for (let i = 0; i < spread; i++) { //for each ray according to spread
         posX = tilePosX //start from tile pos x
@@ -812,10 +839,20 @@ function raysGameProcessing() { //raycasts from player and gets wall and ceiling
             if (opaqueTiles.includes(exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX])) {
                 //if the ray hits something opaque
                 hit = true
+                if ((elevatorOpened) && (exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6)) {
+                    hit = false
+                }
             }
-            if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6) && (rendDist < 5) && (!opened)) {
+            
+            if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6) && (rendDist < 5)) {
+                if (elevatorOpened) {
+                    elevatorCloseOption = 1
+                } else {
                 //if the ray hits the closed elevator doors and you're close
-                winOption = 1
+                    elevatorOpenOption = 1
+                }
+            } else if ((exploredTiles[mazePosY + mazeModY][mazePosX + mazeModX][currentSquareY][currentSquareX] == 6) && (rendDist > 10)) {
+                elevatorOpened = false
             }
 
             floorDist = Math.sqrt(Math.pow(-tilePosY + posY + tileSize * mazeModY, 2) + Math.pow(-tilePosX + posX + tileSize * mazeModX, 2)) / 4 * Math.cos(rad(Math.abs(angle - rayAngle)))
@@ -869,10 +906,18 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
     canvas.fillRect(startX, startY, size, size/2) //black top background
 
     let gradient = canvas.createLinearGradient(startX + size / 2, startY + size / 2, startX + size / 2, startY + size)
-    gradient.addColorStop(0, "#000000")
-    gradient.addColorStop(1, "#bec242")
-    canvas.fillStyle = gradient
-    canvas.fillRect(startX, startY + size/2, size, size/2)
+
+    if (level == 1) {
+        gradient.addColorStop(1, floorColours[level])
+        gradient.addColorStop(0, "#000000")
+        canvas.fillStyle = gradient
+        canvas.fillRect(startX, startY, size, size/2)
+    } else {
+        gradient.addColorStop(0, "#000000")
+        gradient.addColorStop(1, floorColours[level])
+        canvas.fillStyle = gradient
+        canvas.fillRect(startX, startY + size/2, size, size/2)
+    }
 
     canvas.closePath()
 
@@ -883,24 +928,12 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
             canvas.fillStyle = "#000000"
 
             if (!(roofs[m][n][1] == 3)) {
-                canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], 1 / (roofs[m][n][0] + 1))
+                canvas.fillStyle = hex(roofColours[level][roofs[m][n][1]], (levelLights[level] / 2) / (roofs[m][n][0] + (levelLights[level] / 2)))
             } else {
                 canvas.fillStyle = roofColours[level][roofs[m][n][1]]
             }
 
-            canvas.beginPath()
-
-            if (rayWidth != 1) {
-
-                canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0])), rayWidth + 1, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
-
-            } else {
-
-                canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
-
-            }
-            
-            canvas.closePath()
+            canvas.fillRect(startX + (roofs.length - m - 1) * rayWidth, startY + Math.floor(Math.floor((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))), rayWidth, Math.ceil(((size - (size / roofs[m][n+1][0])) / 2 + (size * jumpP / roofs[m][n+1][0])) - ((size - (size / roofs[m][n][0])) / 2 + (size * jumpP / roofs[m][n][0]))))
         }
     }
 
@@ -917,8 +950,13 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
                 canvas.drawImage(levelTextures[level][rays[l][3]], 125 - rayWidth * 500 / rays[l][1], 0, rayWidth * 500 / rays[l][1], 500, startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 1, rayWidth, rays[l][1])
             }
 
-            canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - 2 / (rays[l][2] + 2)) + ")"
+            canvas.fillStyle = "rgba(0, 0, 0, " + String(1 - levelLights[level] / (rays[l][2] + levelLights[level])) + ")"
             canvas.fillRect(startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]), rayWidth, rays[l][1] + 2)
+
+            if (level == 1) {
+                canvas.fillStyle = "rgba(0, 0, 255, 0.5)"
+                canvas.fillRect(startX + (spread-rays[l][0]-1) * rayWidth, startY + size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 0.9 * (rays[l][1] + 2), rayWidth, size - (size / 2 - (rays[l][1] / 2) + (size * jumpP / rays[l][2]) + 0.9 * (rays[l][1] + 2)))
+            }
     
             // canvas.closePath()
 
@@ -932,6 +970,7 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
 
             canvas.drawImage(entitiesHit[k][1].type, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
             canvas.globalAlpha = 1 - 3 / (entitiesHit[k][2] + 3)
+
             canvas.drawImage(entitiesHit[k][1].shadow, startX + size - (angleFrom(angle, entitiesHit[k][0]) + 30) * (size / 60) - size / entitiesHit[k][2] * 2, startY + size / 2 - size / entitiesHit[k][2] * 2 + (size * jumpP * 4 / entitiesHit[k][2]), size / entitiesHit[k][2] * 4, size / entitiesHit[k][2] * 4)
             canvas.globalAlpha = 1
             
@@ -947,18 +986,18 @@ function graphicsProcessing(rays, roofs) { //does a lot lmao...
 
     canvas.font = String(size/15) + "px Arial"
     canvas.textAlign = "center"
-    if ((winOption == 1) && (!opened)) {
+
+    if ((elevatorOpenOption == 1) && (!elevatorOpened)) {
         canvas.fillText("Press 'E' to open door", startX + 0.5 * size, startY + 0.5 * size)
+    }
+    
+    if ((elevatorOpened) && (tileOn == 7) && (elevatorCloseOption == 1)) {
+        canvas.fillText("Press 'E' to close door", startX + 0.5 * size, startY + 0.5 * size)
     }
 
     canvas.fillStyle = "rgba(255, 255, 255, 0.5)"
     if (rand(0, Math.floor(1/(4 * deltaTime))) != 0) {
         canvas.fillText(entityClose, startX + 0.5 * size, startY + 0.4 * size)
-    }
-
-    if (win) {
-        canvas.fillStyle = "rgba(255, 255, 255, " + String(winTrans) + ")"
-        canvas.fillRect(startX, startY, size, size)
     }
 
     canvas.font = String(size/40) + "px Arial"
@@ -1033,8 +1072,8 @@ function changeWindow() { //changes window size and puts menus? CHANGE
             canvas.fillText("ENDROOMS", startX + size * 0.5, startY + size * 0.15)
             canvas.fillText("ONLINE", startX + size * 0.5, startY + size * 0.26)
         } else {
-            logoFlicker += rand(0, (1/deltaTime)/20)
-            if (logoFlicker >= (1/deltaTime)/5) {
+            logoFlicker += rand(0, (1 / deltaTime) / 20)
+            if (logoFlicker >= (1 / deltaTime) / 5) {
                 logoFlicker = 0
             }
         }
@@ -1055,6 +1094,7 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.textAlign = "center"
         canvas.fillText("How to Play", startX + size * 0.5, startY + size * 0.63)
         canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
+
     } else if (difficultyScreen) {
         canvas.font = String(size/10) + "px Arial"
         canvas.textAlign = "center"
@@ -1088,98 +1128,21 @@ function changeWindow() { //changes window size and puts menus? CHANGE
         canvas.textAlign = "center"
         canvas.fillText("click to start", startX + size * 0.5, startY + size * 0.15)
     }
-    
-    // if (startFlag) {
 
-    //     if ((!settings) && (!howToPlay) && (!canChooseDifficulty) && (!canStart) && (!tutorialStart)) {
-    //         canvas.strokeStyle = "#000000"
-
-    //         if (((logoFlicker < 1) && (rand(0, 2/deltaTime) != 0))) {
-    //             canvas.font = String(size/10) + "px Arial"
-    //             canvas.textAlign = "center"
-    //             canvas.fillText("ENDROOMS", startX + size * 0.5, startY + size * 0.15)
-    //             canvas.fillText("ONLINE", startX + size * 0.5, startY + size * 0.26)
-    //         } else {
-    //             logoFlicker += rand(0, (1/deltaTime)/20)
-    //             if (logoFlicker >= (1/deltaTime)/5) {
-    //                 logoFlicker = 0
-    //             }
-    //         }
-
-    //         canvas.font = String(size/20) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("Enter the Endrooms...", startX + size * 0.5, startY + size * 0.41)
-    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
-
-    //         canvas.strokeStyle = "#000000"
-    //         canvas.font = String(size/20) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("Settings", startX + size * 0.5, startY + size * 0.52)
-    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
-
-    //         canvas.strokeStyle = "#000000"
-    //         canvas.font = String(size/20) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("How to Play", startX + size * 0.5, startY + size * 0.63)
-    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
-    //     } else if (canChooseDifficulty) {
-
-    //         canvas.font = String(size/10) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("choose difficulty", startX + size * 0.5, startY + size * 0.15)
-
-    //         canvas.font = String(size/20) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("Easy", startX + size * 0.5, startY + size * 0.41)
-    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.34, size * 0.76, size * 0.1)
-
-    //         canvas.strokeStyle = "#000000"
-    //         canvas.font = String(size/20) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("Medium", startX + size * 0.5, startY + size * 0.52)
-    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.45, size * 0.76, size * 0.1)
-
-    //         canvas.strokeStyle = "#000000"
-    //         canvas.font = String(size/20) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("Hard", startX + size * 0.5, startY + size * 0.63)
-    //         canvas.strokeRect(startX + size * 0.12, startY + size * 0.56, size * 0.76, size * 0.1)
-    //     } else if (canStart) {
-    //         canvas.font = String(size/10) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("click to start", startX + size * 0.5, startY + size * 0.15)
-    //     }
-
-    //     if ((tutorialStart) && (tutorialCount == 0)) {
-    //         canvas.font = String(size/6) + "px Arial"
-    //         canvas.textAlign = "center"
-    //         canvas.fillText("LOADING...", startX + size / 2, startY + size / 2)
-    //     }
-
-    //     // canvas.drawImage(startImages[tutorialCount], startX, startY, size, size)
-    // }
-
-    if (win) {
-        if (winTrans > 1) {
-            canvas.font = String(size/12) + "px Arial"
-            canvas.textAlign = "left"
-            canvas.drawImage(winImg, startX, startY, size, size)
-            // canvas.fillText("congrats, you escaped!", startX + size / 2, startY + size * 0.2)
-            // canvas.fillText("game made by oscar", startX + size / 2, startY + size * 0.6)
-            canvas.fillText(String(gameTimerCumulative / 1000), startX + size * 0.1, startY + size * 0.55)
-            // canvas.fillText("click to restart", startX + size / 2, startY + size * 0.8)
-            document.exitPointerLock()
-        } else {
-            winTrans += 0.2 * deltaTime
-            if (ambience[level].volume > 0.2 * deltaTime) {
-                ambience[level].volume -= 0.2 * deltaTime
-            }
-            if (winTrans > 1) {
-                ambience[level].pause()
-                winSound.loop = true
-                winSound.play()
-            }
-        }
+    if ((elevatorOpened == 0) && ((tileOn == 7) || (tileOn == 8)) || (keys["b"])) {
+    // if ((elevatorOpened == 0) && ((tileOn == 7) || (tileOn == 8))) {
+        ambience[level].pause()
+        chase[level].pause()
+        level++
+        ambience[level].loop = true
+        ambience[level].play()
+        entities = []
+        keys = {}
+        tilePosX = 0.5 //position on the tile X
+        tilePosY = 0.5 //position on the tile Y
+        mazePosX = viewRadius //position of tile on maze X
+        mazePosY = viewRadius //position of tile on maze Y
+        exploredTiles = initialiseMaze()
     }
 
     if (dead) {
@@ -1322,6 +1285,10 @@ function mainloop() { //controls all function
 
         }
 
+        if (level == 1) {
+            entityClose = "new level coming soon..."
+        }
+
         raysGameProcessing()
 
         createMaze()
@@ -1332,6 +1299,7 @@ function mainloop() { //controls all function
     canvas.lineWidth = Math.ceil(size/100)
     canvas.strokeRect(0, 0, canvas.canvas.width, canvas.canvas.height)
     canvas.strokeRect(startX, startY, size, size)
+    
     
     requestAnimationFrame(mainloop)
 
@@ -1344,8 +1312,8 @@ var canvas = c.getContext("2d"); //getting canvas context
 //STORES
 const tileSize = 100 //size of each tile
 const renderDist = 100 //distance, in blocks, that player can see (technically not straight distance)
-var opaqueTiles = [1, 2, 5, 6] //tiles which you can't see through
-var wallTiles = [1, 2, 5, 6] //tiles which you can't walk through
+const opaqueTiles = [1, 2, 5, 6] //tiles which you can't see through
+const wallTiles = [1, 2, 5, 6] //tiles which you can't walk through
 const viewRadius = Math.ceil(renderDist/tileSize) + 1 //how many tiles which can be generated away
 const renderModes = ["", "super high", "", "high", "", "medium", "", "low", "", "ultra low"] //shortcut list for render modes
 const difficulties = ["easy", "medium", "hard"] //list for difficulties
@@ -1361,7 +1329,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 //WALL TEXTURES
-var levelTextures = [{1: false, 2: false, 5: false, 6: false}]
+var levelTextures = [{1: false, 2: false, 5: false, 6: false}, {1: false}]
 for (let i = 0; i < levelTextures.length; i++) {
     let j = 0
     for (let property in levelTextures[i]) {
@@ -1371,7 +1339,9 @@ for (let i = 0; i < levelTextures.length; i++) {
     }
 }
 
-const roofColours = [{0: "#f2ec90", 3: "#ffffff", 6: "#666459", 7: "#666459", 8: "#666459"}]
+const roofColours = [{0: "#f2ec90", 3: "#ffffff", 6: "#666459", 7: "#666459", 8: "#666459"}, {0: "#EEEEEE"}]
+const floorColours = ["#bec242", "#bfc9c9"]
+const levelLights = [2, 10]
 
 //SLIDES
 var startImages = []
@@ -1433,6 +1403,7 @@ var mazePosX = viewRadius //position of tile on maze X
 var mazePosY = viewRadius //position of tile on maze Y
 var angle = 0 //angle of player from right anticlockwise
 var viewAngle = 60 //angle that user can see (60 is good)
+var tileOn = 0
 
 //entities
 var entities = [] //list of entities as objects
@@ -1454,8 +1425,9 @@ var timeSinceJump = 0 //time since jump using deltatime
 var speed = 1 //speed of player modifier
 
 //gameplay
-var winOption = 0 //able to open elevator doors
-var opened = false //elevator doors open?
+var elevatorOpenOption = 0 //able to open elevator doors
+var elevatorCloseOption = 0 //able to close elevator doors
+var elevatorOpened = false //elevator doors open?
 var win = false //user has won
 var dead = false //user dead
 var gameTimer = 0 //timer of game
@@ -1470,7 +1442,6 @@ var deltaTimer = 0 //helps with deltatime
 var pauseScreen = false //pause screen (from game)
 var startFlag = true //can user click to start game
 var canClick = false //can user enter pointer lock
-var winTrans = 0 //transparency of win fade
 var jumpscare = 0 //jumpscare timer
 var canStart = false //has tutorial been completed
 var tutorialCount = 0 //page of tutorial
@@ -1615,7 +1586,7 @@ c.addEventListener("click", async (e) => {
                 unadjustedMovement: true,
             })
         }
-    } else if ((winTrans > 1) || (jumpscare > 1)) {
+    } else if (jumpscare > 1) {
         window.location.reload()
     } else if (menuScreen) {
         if (mouseInBounds(0.12, 0.76, 0.34, 0.44)) {
@@ -1667,11 +1638,15 @@ window.addEventListener('keydown', function (e) { //activates whenever a key is 
             }
         }
 
-        if ((String(e.key).toLowerCase() == "e") && (winOption == 1)) {
-            winOption = 0
-            opaqueTiles.splice(opaqueTiles.indexOf(6), 1)
-            wallTiles.splice(wallTiles.indexOf(6), 1)
-            opened = true
+        if (String(e.key).toLowerCase() == "e") {
+            if (elevatorOpenOption == 1) {
+                elevatorOpenOption = 0
+                elevatorOpened = true
+            }
+            if (elevatorCloseOption == 1) {
+                elevatorCloseOption = 0
+                elevatorOpened = false
+            }
         }
 
         if (tutorialCount == 7) {
